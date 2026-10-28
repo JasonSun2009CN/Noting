@@ -1,0 +1,39 @@
+{
+  "name": "noting",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An open-source, self-hosted workspace with a block editor, databases, and bring-your-own-key AI.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c magenta,cyan \"node --watch server/index.js\" \"vite --config web/vite.config.ts\"",
+    "build": "vite build --config web/vite.config.ts",
+    "start": "NODE_ENV=production node server/index.js",
+    "seed": "node server/seed.js --force",
+    "test": "node --test server/*.test.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.11.1",
+    "compression": "^1.7.5",
+    "express": "^4.21.2",
+    "multer": "^2.5.0",
+    "sanitize-html": "^2.14.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
+    "lucide-react": "^0.475.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0"
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true,
+    "better-sqlite3@12.11.1": true
+  }
+}
