@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jasonsun2009cn.github.io/Noting/sitemap.xml

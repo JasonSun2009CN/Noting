@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Page not found · Noting</title>
+  <meta name="robots" content="noindex" />
+  <meta name="theme-color" content="#faf8f5" />
+  <link rel="icon" href="/Noting/assets/favicon.svg" type="image/svg+xml" />
+  <style>
+    @font-face {
+      font-family: "Geist";
+      src: url("/Noting/assets/fonts/geist-variable.woff2") format("woff2");
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+    :root {
+      --paper: #faf8f5;
+      --paper-2: #f3efe9;
+      --ink: #14120f;
+      --muted: #6e655d;
+      --line: #e5dfd7;
+      --accent: #d9553f;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --font: "Geist", system-ui, -apple-system, sans-serif;
+      --mono: "Geist Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    main { max-width: 520px; text-align: center; }
+    .mark {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 32px;
+      border-radius: 12px;
+      background: var(--ink);
+      color: #fff;
+    }
+    p.code {
+      margin: 0 0 16px;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    h1 {
+      margin: 0;
+      font-size: 36px;
+      line-height: 1;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+    }
+    p.lead {
+      margin: 16px 0 0;
+      font-size: 18px;
+      line-height: 28px;
+      color: var(--muted);
+      text-wrap: pretty;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 32px;
+    }
+    a.btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      font-size: 16px;
+      line-height: 24px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background-color 0.3s var(--ease), transform 0.5s var(--ease);
+    }
+    a.btn:hover { transform: translateY(-1px); }
+    a.primary { background: var(--ink); color: #fff; }
+    a.primary:hover { background: #272727; }
+    a.ghost { background: #fff; border-color: #d6cec4; color: var(--ink); }
+    a.ghost:hover { border-color: var(--ink); }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  </style>
+</head>
+<body>
+  <main>
+    <span class="mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M7 18V6h2.4l5.2 8V6H17v12h-2.4L9.4 10v8H7Z" fill="currentColor" /></svg>
+    </span>
+    <p class="code">Error 404</p>
+    <h1>This page left the workspace.</h1>
+    <p class="lead">The link may be old, or the note may have moved. Everything else is exactly where you left it.</p>
+    <div class="actions">
+      <a class="btn primary" href="/Noting/">Back to Noting</a>
+      <a class="btn ghost" href="https://github.com/JasonSun2009CN/Noting">Open GitHub</a>
+    </div>
+  </main>
+</body>
+</html>

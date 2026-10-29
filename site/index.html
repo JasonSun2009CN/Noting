@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Noting · A private workspace you own</title>
+  <meta name="description" content="Noting is an open source, self hosted workspace with a block editor, nested pages, databases and an AI panel that runs on your own key. Download it for macOS, Windows or Linux." />
+  <meta name="theme-color" content="#faf8f5" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="canonical" href="https://jasonsun2009cn.github.io/Noting/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Noting" />
+  <meta property="og:title" content="Noting · A private workspace you own" />
+  <meta property="og:description" content="An open source block editor with nested pages, databases and bring your own key AI. Every note lives in one SQLite file on your machine." />
+  <meta property="og:url" content="https://jasonsun2009cn.github.io/Noting/" />
+  <meta property="og:image" content="https://jasonsun2009cn.github.io/Noting/assets/og.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Noting: a workspace you actually own, shown with a screenshot of the app" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Noting · A private workspace you own" />
+  <meta name="twitter:description" content="An open source block editor with nested pages, databases and bring your own key AI. Every note lives in one SQLite file on your machine." />
+  <meta name="twitter:image" content="https://jasonsun2009cn.github.io/Noting/assets/og.png" />
+
+  <link rel="preload" href="assets/fonts/geist-variable.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/fonts/geist-mono-variable.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="styles.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Noting",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "macOS, Windows, Linux",
+    "description": "An open source, self hosted workspace with a block editor, nested pages, databases and bring your own key AI.",
+    "url": "https://jasonsun2009cn.github.io/Noting/",
+    "codeRepository": "https://github.com/JasonSun2009CN/Noting",
+    "license": "https://github.com/JasonSun2009CN/Noting/blob/main/LICENSE",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary">
+      <a class="brand" href="#top" aria-label="Noting, overview">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
+            <path d="M7 18V6h2.4l5.2 8V6H17v12h-2.4L9.4 10v8H7Z" fill="currentColor" />
+          </svg>
+        </span>
+        <span class="brand-name">Noting</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#top" aria-current="page">Overview</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#setup">Setup</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a class="icon-btn" href="https://github.com/JasonSun2009CN/Noting" target="_blank" rel="noopener" aria-label="Noting on GitHub (opens in a new tab)">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+            <path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.9 1.2 1.9 1.2 1.1 1.9 2.9 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.7.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z" />
+          </svg>
+        </a>
+        <a class="btn btn-primary btn-sm" data-download href="https://github.com/JasonSun2009CN/Noting/releases">Download</a>
+        <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menu-panel">
+          <span class="menu-toggle-box" aria-hidden="true"><i></i><i></i></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <div class="menu-panel" id="menu-panel" aria-hidden="true">
+    <nav class="menu-panel-inner" aria-label="Mobile">
+      <a class="menu-link" href="#top">Overview</a>
+      <a class="menu-link" href="#features">Features</a>
+      <a class="menu-link" href="#setup">Setup</a>
+      <a class="menu-link" href="#faq">FAQ</a>
+      <a class="menu-link" href="https://github.com/JasonSun2009CN/Noting" target="_blank" rel="noopener">GitHub</a>
+      <a class="btn btn-primary menu-download" data-download href="https://github.com/JasonSun2009CN/Noting/releases">Download the app</a>
+    </nav>
+  </div>
+
+  <main id="main">
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="wrap hero-inner">
+        <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Open source · Apache 2.0 · Runs offline</p>
+        <h1 class="hero-title" id="hero-title">A workspace<br />you actually own.</h1>
+        <p class="hero-sub">Noting is a block editor with nested pages, databases and an AI panel that runs on your own key. Every note sits in a SQLite file on your machine, not in someone else's cloud.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" data-download href="https://github.com/JasonSun2009CN/Noting/releases">
+            Download the app
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 4v12m0 0 4.5-4.5M12 16l-4.5-4.5M5 20h14" />
+            </svg>
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/JasonSun2009CN/Noting" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+              <path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.9 1.2 1.9 1.2 1.1 1.9 2.9 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.7.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z" />
+            </svg>
+            View the source
+          </a>
+        </div>
+        <p class="hero-note">Free and open source. No account, no telemetry, no sync service.</p>
+      </div>
+
+      <div class="wrap">
+        <figure class="app-frame">
+          <div class="app-chrome" aria-hidden="true">
+            <span class="traffic"><i></i><i></i><i></i></span>
+            <span class="addr">localhost:4000</span>
+            <span class="chrome-spacer"></span>
+          </div>
+          <img src="assets/screenshot.png" width="2880" height="1720" alt="The Noting desktop app open on a welcome page, with a sidebar of nested pages, a block editor and a peach and pink page cover." />
+        </figure>
+      </div>
+    </section>
+
+    <section class="platforms" aria-label="Supported platforms">
+      <div class="wrap platform-grid">
+        <a class="platform" data-download data-platform="mac" href="https://github.com/JasonSun2009CN/Noting/releases">
+          <span class="platform-name">macOS</span>
+          <span class="platform-meta">Apple silicon and Intel</span>
+          <svg class="platform-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" /></svg>
+        </a>
+        <a class="platform" data-download data-platform="win" href="https://github.com/JasonSun2009CN/Noting/releases">
+          <span class="platform-name">Windows</span>
+          <span class="platform-meta">Windows 10 and 11</span>
+          <svg class="platform-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" /></svg>
+        </a>
+        <a class="platform" data-download data-platform="linux" href="https://github.com/JasonSun2009CN/Noting/releases">
+          <span class="platform-name">Linux</span>
+          <span class="platform-meta">AppImage and deb packages</span>
+          <svg class="platform-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" /></svg>
+        </a>
+        <a class="platform" href="https://github.com/JasonSun2009CN/Noting#docker">
+          <span class="platform-name">Docker</span>
+          <span class="platform-meta">One container, one volume</span>
+          <svg class="platform-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" /></svg>
+        </a>
+      </div>
+    </section>
+
+    <section class="tagline-section" aria-labelledby="tagline-title">
+      <div class="wrap">
+        <h2 class="tagline" id="tagline-title" data-tagline>Your notes should not live on a server you do not control.</h2>
+      </div>
+    </section>
+
+    <section class="section" id="features" aria-labelledby="features-title">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="kicker">Features</p>
+          <h2 id="features-title">Everything a notes app needs. Nothing you have to rent.</h2>
+          <p class="lead">The editor, the databases and the search are all local. The AI panel is optional, and it uses a key you already have.</p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2" /><rect x="13" y="3" width="8" height="8" rx="2" /><rect x="3" y="13" width="8" height="8" rx="2" /><path d="M17 13v8M13 17h8" /></svg>
+            </span>
+            <h3>Blocks that behave</h3>
+            <p>Type, drag and indent. Every heading, to do, toggle, callout and code block is a block you can move with a handle. Markdown shortcuts work too.</p>
+          </article>
+
+          <article class="feature reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="8" ry="3" /><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13" /><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" /></svg>
+            </span>
+            <h3>Databases that stay in view</h3>
+            <p>Tables and boards with select, date, checkbox and URL properties. Sort them, edit inline, and open a row when you need the detail.</p>
+          </article>
+
+          <article class="feature reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-4.2-4.2" /></svg>
+            </span>
+            <h3>Search before you scroll</h3>
+            <p>Press <kbd>⌘K</kbd> to open pages and actions without touching the mouse. Full text search covers titles and every block inside them.</p>
+          </article>
+
+          <article class="feature reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 13.8 9l5.7 1.8-5.7 1.9L12 18.4l-1.8-5.7L4.5 10.8 10.2 9 12 3.5Z" /><path d="M18.5 16.5 19 18l1.5.5-1.5.5-.5 1.5-.5-1.5L16.5 18l1.5-.5.5-1.5Z" /></svg>
+            </span>
+            <h3>AI on your own key</h3>
+            <p>OpenAI, Anthropic, DeepSeek or any OpenAI compatible endpoint. Your key stays in the browser and never reaches the database.</p>
+          </article>
+
+          <article class="feature reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h9l5 5v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" /><path d="M14 4v5h5" /><path d="M8.5 14h7M8.5 17h4.5" /></svg>
+            </span>
+            <h3>Your notes in one file</h3>
+            <p>Pages, blocks, uploads and databases live in one SQLite file. Stop the server, copy the folder, and the backup is done.</p>
+          </article>
+
+          <article class="feature reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z" /></svg>
+            </span>
+            <h3>Dark when you want it</h3>
+            <p>Follow the system or pick light or dark yourself. The app is local, so it keeps working when the network does not.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section setup" id="setup" aria-labelledby="setup-title">
+      <div class="wrap setup-grid">
+        <div class="setup-copy reveal">
+          <p class="kicker">Setup</p>
+          <h2 id="setup-title">Running in about a minute.</h2>
+          <ol class="steps">
+            <li class="step">
+              <span class="step-num" aria-hidden="true">01</span>
+              <div>
+                <h3>Download and install</h3>
+                <p>Grab the build for your platform from GitHub Releases. The desktop app keeps notes in your user data folder.</p>
+              </div>
+            </li>
+            <li class="step">
+              <span class="step-num" aria-hidden="true">02</span>
+              <div>
+                <h3>Or start the container</h3>
+                <p>Clone the repo and run one command. The server listens on port 4000 and stores everything in a Docker volume.</p>
+              </div>
+            </li>
+            <li class="step">
+              <span class="step-num" aria-hidden="true">03</span>
+              <div>
+                <h3>Write something</h3>
+                <p>A small demo workspace is created on first run. Delete it when you start your own pages.</p>
+              </div>
+            </li>
+          </ol>
+          <p class="setup-link">
+            <a class="text-link" href="https://github.com/JasonSun2009CN/Noting#quick-start" target="_blank" rel="noopener">
+              Read the full setup guide
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+            </a>
+          </p>
+        </div>
+
+        <div class="reveal">
+          <div class="terminal">
+            <div class="terminal-bar">
+              <span class="traffic traffic-dark" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="terminal-title">terminal</span>
+              <button class="copy-btn" type="button" data-copy="docker compose up -d --build" aria-label="Copy the Docker command">
+                <svg class="copy-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M15 5.5V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h.5" /></svg>
+                <svg class="check-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7" /></svg>
+              </button>
+            </div>
+            <pre class="terminal-body"><code><span class="t-prompt">$</span> <span class="t-cmd">docker compose up -d --build</span>
+<span class="t-dim">  noting  built in 12.4s</span>
+<span class="t-dim">  noting  running</span>
+
+<span class="t-prompt">$</span> <span class="t-cmd">open http://localhost:4000</span></code></pre>
+            <span class="sr-only" role="status" aria-live="polite" data-copy-status></span>
+          </div>
+          <p class="data-note">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7c0-1.7 3.6-3 8-3s8 1.3 8 3v10c0 1.7-3.6 3-8 3s-8-1.3-8-3V7Z" /><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" /></svg>
+            Your data stays in <code>./data/noting.db</code> and the uploads folder beside it.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="faq" aria-labelledby="faq-title">
+      <div class="wrap faq-grid">
+        <div class="faq-head reveal">
+          <p class="kicker">FAQ</p>
+          <h2 id="faq-title">Good questions.</h2>
+          <p class="lead">The things people ask before they move their notes.</p>
+        </div>
+
+        <div class="faq-list reveal">
+          <details class="faq-item">
+            <summary>Is Noting really free?<span class="faq-icon" aria-hidden="true"></span></summary>
+            <div class="faq-body"><p>Yes. The code is Apache 2.0 and there is no paid tier, no seat count and no hosted plan to upsell you. You pay for your own hardware and, if you use one, your own AI key.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>How is this different from Notion?<span class="faq-icon" aria-hidden="true"></span></summary>
+            <div class="faq-body"><p>Notion keeps your pages on their servers. Noting keeps them in a SQLite file you can open, copy and back up. It also ships no telemetry and lets you bring any OpenAI compatible model.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>Where are my notes stored?<span class="faq-icon" aria-hidden="true"></span></summary>
+            <div class="faq-body"><p>In the desktop app they live in your OS application data folder. In Docker they live in the <code>/data</code> volume. Either way it is one SQLite file plus an uploads folder.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>What happens to my AI key?<span class="faq-icon" aria-hidden="true"></span></summary>
+            <div class="faq-body"><p>It stays in your browser's local storage and is sent to your own Noting server only when you ask for something. The server forwards the request to the provider you picked. Keys are never written to SQLite and never logged.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>Does the AI see my whole workspace?<span class="faq-icon" aria-hidden="true"></span></summary>
+            <div class="faq-body"><p>No. Only the text you send from the AI panel, plus the page context you include, reaches the provider. Nothing is indexed in the background.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>Can I use it on my phone?<span class="faq-icon" aria-hidden="true"></span></summary>
+            <div class="faq-body"><p>There is no mobile app yet. You can open your server in a mobile browser over your local network or a private tunnel. Set <code>NOTING_PASSWORD</code> and put HTTPS in front before you expose it to the internet.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>Can I import from Notion or Markdown?<span class="faq-icon" aria-hidden="true"></span></summary>
+            <div class="faq-body"><p>Not yet. Pages export to Markdown today. Importers are on the list, and the SQLite schema is small enough to script against if you cannot wait.</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>Are the installers signed?<span class="faq-icon" aria-hidden="true"></span></summary>
+            <div class="faq-body"><p>Not by default. macOS may ask you to right click and choose Open the first time. Signed builds appear once the Apple and Windows signing secrets are configured in the repo.</p></div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="section cta-section" aria-labelledby="cta-title">
+      <div class="wrap">
+        <div class="cta reveal">
+          <p class="kicker kicker-light">Get started</p>
+          <h2 id="cta-title">Your notes. Your machine.</h2>
+          <p>Download the desktop app, or run the server yourself. Either path takes about a minute and leaves you with a file you can keep.</p>
+          <div class="cta-actions">
+            <a class="btn btn-invert" data-download href="https://github.com/JasonSun2009CN/Noting/releases">Download the app</a>
+            <a class="btn btn-outline-light" href="https://github.com/JasonSun2009CN/Noting" target="_blank" rel="noopener">View on GitHub</a>
+          </div>
+          <p class="cta-note">Apache 2.0 · No account required · Works offline</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="brand" href="#top" aria-label="Noting, back to top">
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true"><path d="M7 18V6h2.4l5.2 8V6H17v12h-2.4L9.4 10v8H7Z" fill="currentColor" /></svg>
+            </span>
+            <span class="brand-name">Noting</span>
+          </a>
+          <p>An open source workspace with a block editor, databases and an AI panel that uses your own key.</p>
+        </div>
+
+        <nav class="footer-col" aria-label="Product">
+          <h2>Product</h2>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#setup">Setup</a></li>
+            <li><a href="https://github.com/JasonSun2009CN/Noting/releases">Downloads</a></li>
+            <li><a href="#faq">FAQ</a></li>
+          </ul>
+        </nav>
+
+        <nav class="footer-col" aria-label="Project">
+          <h2>Project</h2>
+          <ul>
+            <li><a href="https://github.com/JasonSun2009CN/Noting" target="_blank" rel="noopener">GitHub</a></li>
+            <li><a href="https://github.com/JasonSun2009CN/Noting/issues" target="_blank" rel="noopener">Issues</a></li>
+            <li><a href="https://github.com/JasonSun2009CN/Noting/blob/main/LICENSE" target="_blank" rel="noopener">License</a></li>
+            <li><a href="https://github.com/JasonSun2009CN/Noting#readme" target="_blank" rel="noopener">README</a></li>
+          </ul>
+        </nav>
+
+        <div class="footer-col">
+          <h2>Local by default</h2>
+          <ul>
+            <li>No cookies</li>
+            <li>No analytics</li>
+            <li>No tracking scripts</li>
+            <li>Fonts served from this site</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 Noting contributors</p>
+        <p class="footer-license"><a href="privacy.html">Privacy</a> · <a href="https://github.com/JasonSun2009CN/Noting/blob/main/LICENSE" target="_blank" rel="noopener">Apache 2.0</a> · Built in the open</p>
+      </div>
+    </div>
+  </footer>
+
+  <noscript>
+    <style>.reveal { opacity: 1; transform: none; }</style>
+  </noscript>
+  <script src="main.js" defer></script>
+</body>
+</html>
