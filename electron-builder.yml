@@ -21,7 +21,8 @@ extraResources:
 asar: true
 asarUnpack:
   - node_modules/better-sqlite3/**/*
-npmRebuild: true
+# better-sqlite3 13 uses N-API, so its prebuilt binary works in Electron as-is.
+npmRebuild: false
 
 mac:
   category: public.app-category.productivity

@@ -27,7 +27,7 @@ file that you own.
 
 ## Quick start
 
-Requirements: Node.js 20+ and npm.
+Requirements: Node.js 22+ and npm.
 
 ```bash
 npm install
