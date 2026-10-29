@@ -1,0 +1,16 @@
+services:
+  noting:
+    build: .
+    container_name: noting
+    restart: unless-stopped
+    ports:
+      - "${PORT:-4000}:4000"
+    environment:
+      PORT: 4000
+      NOTING_DATA_DIR: /data
+      NOTING_PASSWORD: ${NOTING_PASSWORD:-}
+    volumes:
+      - noting-data:/data
+
+volumes:
+  noting-data:
