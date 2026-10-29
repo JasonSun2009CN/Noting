@@ -106,7 +106,10 @@ export function escapeHtml(text = '') {
 }
 
 export function htmlToText(html = '') {
-  return sanitizeHtml(String(html), { allowedTags: [], allowedAttributes: {} })
+  return sanitizeHtml(String(html).replace(/<br\s*\/?>/gi, '\n'), {
+    allowedTags: [],
+    allowedAttributes: {},
+  })
     .replaceAll('&nbsp;', ' ')
     .replaceAll('&amp;', '&')
     .replaceAll('&lt;', '<')

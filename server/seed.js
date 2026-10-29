@@ -165,7 +165,7 @@ export function seedDatabase() {
       { type: 'page', html: '', props: { pageId: readingId } },
       p(''),
       h2('Bring your own AI'),
-      p('Open the AI panel with the ✨ button in the top right, or type <code>/ai</code>. Noting never proxies through our servers — requests go straight from your machine using the API key you provide.'),
+      p('Open the AI panel with the ✨ button in the top right, or type <code>/ai</code>. Your key is stored in this browser and sent through your own Noting server to the provider you choose — never to anyone else.'),
       code(
         `// Configure any OpenAI-compatible endpoint
 {
