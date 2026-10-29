@@ -1,0 +1,53 @@
+appId: com.noting.desktop
+productName: Noting
+copyright: Copyright © 2026 Noting contributors
+
+directories:
+  output: release
+  buildResources: build
+
+# Keep the bundle small: the React build is shipped as an extra resource and the
+# Electron main process imports the same server/ code as the Docker image.
+files:
+  - desktop/**/*
+  - server/**/*
+  - package.json
+  - LICENSE
+
+extraResources:
+  - from: dist
+    to: dist
+
+asar: true
+asarUnpack:
+  - node_modules/better-sqlite3/**/*
+npmRebuild: true
+
+mac:
+  category: public.app-category.productivity
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  target:
+    - dmg
+    - zip
+
+dmg:
+  artifactName: ${productName}-${version}-${arch}.${ext}
+
+win:
+  target:
+    - nsis
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: false
+
+linux:
+  category: Office
+  maintainer: Noting contributors <noting@users.noreply.github.com>
+  synopsis: Private, self-hosted workspace with a block editor
+  target:
+    - AppImage
+    - deb

@@ -29,6 +29,7 @@ import { seedDatabase } from './seed.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = Number(process.env.PORT) || 4000;
+const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
 
 seedDatabase();
 
@@ -52,7 +53,7 @@ app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '7d', fallthrough: fals
 const api = express.Router();
 
 api.get('/health', (req, res) => {
-  res.json({ ok: true, version: '0.1.0' });
+  res.json({ ok: true, version: pkg.version });
 });
 
 api.get('/bootstrap', (req, res) => {
@@ -752,7 +753,7 @@ app.use((error, req, res, next) => {
 // Static frontend (production build)
 // ---------------------------------------------------------------------------
 
-const dist = path.join(ROOT, 'dist');
+const dist = process.env.NOTING_DIST_DIR || path.join(ROOT, 'dist');
 if (fs.existsSync(dist)) {
   app.use(express.static(dist, { maxAge: '1h', index: false }));
   app.get('*', (req, res, next) => {
@@ -761,7 +762,41 @@ if (fs.existsSync(dist)) {
   });
 }
 
-app.listen(PORT, () => {
-  console.log(`Noting API listening on http://localhost:${PORT}`);
-  console.log(`Data directory: ${DATA_DIR}`);
-});
+/**
+ * Start the HTTP server. Used by `npm start`, Docker and the Electron shell.
+ * Resolves once the socket is listening with the real port (handy for port 0).
+ */
+export function startServer({ port = PORT, host = process.env.NOTING_HOST || '0.0.0.0' } = {}) {
+  return new Promise((resolve, reject) => {
+    const server = app.listen(port, host);
+    const onError = (error) => {
+      server.close();
+      reject(error);
+    };
+    server.once('error', onError);
+    server.once('listening', () => {
+      server.off('error', onError);
+      const address = server.address();
+      resolve({
+        server,
+        port: typeof address === 'object' && address ? address.port : port,
+        close: () => new Promise((done) => server.close(done)),
+      });
+    });
+  });
+}
+
+const isDirectRun =
+  Boolean(process.argv[1]) && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isDirectRun) {
+  startServer()
+    .then(({ port }) => {
+      console.log(`Noting API listening on http://localhost:${port}`);
+      console.log(`Data directory: ${DATA_DIR}`);
+    })
+    .catch((error) => {
+      console.error(error?.code === 'EADDRINUSE' ? `Port ${PORT} is already in use.` : error);
+      process.exit(1);
+    });
+}

@@ -72,6 +72,24 @@ docker run -d --name noting -p 4000:4000 -v noting-data:/data noting
 
 The container stores its data in the `/data` volume.
 
+### Desktop app (Electron)
+
+The desktop build reuses the same server and web client, wraps them in Electron, and
+stores notes under the OS app-data directory instead of `./data`. It only listens on
+`127.0.0.1`.
+
+```bash
+npm install
+npm run desktop      # build the UI and launch the app
+npm run dist:mac     # or dist:win / dist:linux, output in release/
+```
+
+CI builds installers for macOS (arm64 + x64), Windows, and Linux via
+`.github/workflows/desktop.yml`. Push a `v*` tag to build all platforms and open a
+draft GitHub release, or run the workflow manually to download artifacts. Builds are
+unsigned unless the `CSC_LINK`, `CSC_KEY_PASSWORD`, `APPLE_ID`,
+`APPLE_APP_SPECIFIC_PASSWORD`, and `APPLE_TEAM_ID` secrets are configured.
+
 ## Configuration
 
 | Variable          | Default  | Description                                              |
