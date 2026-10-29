@@ -39,12 +39,12 @@ jobs:
             platform: linux
             arch: x64
     env:
-      # Optional code-signing. Builds are unsigned when these secrets are absent.
-      CSC_LINK: ${{ secrets.CSC_LINK }}
-      CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-      APPLE_ID: ${{ secrets.APPLE_ID }}
-      APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      # Avoid enabling a signing path when no certificate is configured.
+      SIGN_CERT: ${{ secrets.CSC_LINK }}
+      SIGN_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+      NOTARY_APPLE_ID: ${{ secrets.APPLE_ID }}
+      NOTARY_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+      NOTARY_TEAM: ${{ secrets.APPLE_TEAM_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -52,6 +52,21 @@ jobs:
         with:
           node-version: 22
           cache: npm
+
+      - name: Configure code signing
+        shell: bash
+        run: |
+          if [ -n "$SIGN_CERT" ]; then
+            {
+              echo "CSC_LINK=$SIGN_CERT"
+              echo "CSC_KEY_PASSWORD=$SIGN_PASSWORD"
+              if [ -n "$NOTARY_APPLE_ID" ]; then
+                echo "APPLE_ID=$NOTARY_APPLE_ID"
+                echo "APPLE_APP_SPECIFIC_PASSWORD=$NOTARY_PASSWORD"
+                echo "APPLE_TEAM_ID=$NOTARY_TEAM"
+              fi
+            } >> "$GITHUB_ENV"
+          fi
 
       - name: Install dependencies
         run: npm ci

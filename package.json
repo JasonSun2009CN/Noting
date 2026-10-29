@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "description": "An open-source, self-hosted workspace with a block editor, databases, and bring-your-own-key AI.",
+  "author": "Noting contributors <noting@users.noreply.github.com>",
   "type": "module",
   "main": "desktop/main.js",
   "engines": {
