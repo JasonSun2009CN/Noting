@@ -2,6 +2,8 @@ appId: com.noting.desktop
 productName: Noting
 copyright: Copyright © 2026 Noting contributors
 
+# build/icon.icns, icon.ico and icon.png are derived from web/public/favicon.svg.
+
 directories:
   output: release
   buildResources: build
@@ -26,6 +28,7 @@ npmRebuild: false
 
 mac:
   category: public.app-category.productivity
+  icon: build/icon.icns
   hardenedRuntime: true
   gatekeeperAssess: false
   target:
@@ -36,6 +39,7 @@ dmg:
   artifactName: ${productName}-${version}-${arch}.${ext}
 
 win:
+  icon: build/icon.ico
   target:
     - nsis
 
@@ -47,6 +51,7 @@ nsis:
 
 linux:
   category: Office
+  icon: build/icon.png
   maintainer: Noting contributors <noting@users.noreply.github.com>
   synopsis: Private, self-hosted workspace with a block editor
   target:
