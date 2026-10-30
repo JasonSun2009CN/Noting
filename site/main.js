@@ -3,6 +3,25 @@
 const REPO = "JasonSun2009CN/Noting";
 const RELEASES_URL = `https://github.com/${REPO}/releases`;
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const isZh = document.documentElement.lang.toLowerCase().startsWith("zh");
+
+const ui = isZh
+  ? {
+      menuOpen: "打开菜单",
+      menuClose: "关闭菜单",
+      copyLabel: "复制 Docker 命令",
+      copiedLabel: "Docker 命令已复制",
+      copied: "命令已复制到剪贴板",
+      copyFailed: "复制失败，请手动选择命令后复制",
+    }
+  : {
+      menuOpen: "Open menu",
+      menuClose: "Close menu",
+      copyLabel: "Copy the Docker command",
+      copiedLabel: "Docker command copied",
+      copied: "Command copied to clipboard",
+      copyFailed: "Copy failed. Select the command and copy it manually.",
+    };
 
 /* --------------------------------------------------------------------------
    Mobile menu
@@ -16,7 +35,7 @@ let lastFocused = null;
 function setMenu(open) {
   if (!menuToggle || !menuPanel) return;
   menuToggle.setAttribute("aria-expanded", String(open));
-  menuToggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  menuToggle.setAttribute("aria-label", open ? ui.menuClose : ui.menuOpen);
   menuPanel.setAttribute("aria-hidden", String(!open));
   menuPanel.classList.toggle("open", open);
   document.body.classList.toggle("menu-open", open);
@@ -93,14 +112,26 @@ if ("IntersectionObserver" in window && !reduceMotion) {
 
 document.querySelectorAll("[data-tagline]").forEach((tagline) => {
   const text = tagline.textContent.trim();
-  const words = text.split(/\s+/);
+  const trailing = /[，。！？；：、）》」』】…]/;
+  const tokens = [];
+
+  if (isZh) {
+    Array.from(text).forEach((char) => {
+      if (/\s/.test(char)) return;
+      if (trailing.test(char) && tokens.length) tokens[tokens.length - 1] += char;
+      else tokens.push(char);
+    });
+  } else {
+    text.split(/\s+/).forEach((word) => tokens.push(word));
+  }
 
   tagline.textContent = "";
-  const wordEls = words.map((word) => {
+  const wordEls = tokens.map((token) => {
     const span = document.createElement("span");
     span.className = "word";
-    span.textContent = word;
-    tagline.append(span, document.createTextNode(" "));
+    span.textContent = token;
+    tagline.append(span);
+    if (!isZh) tagline.append(document.createTextNode(" "));
     return span;
   });
 
@@ -158,17 +189,17 @@ copyBtn?.addEventListener("click", async () => {
   try {
     await copyText(text);
     copyBtn.classList.add("is-copied");
-    copyBtn.setAttribute("aria-label", "Docker command copied");
-    if (copyStatus) copyStatus.textContent = "Command copied to clipboard";
+    copyBtn.setAttribute("aria-label", ui.copiedLabel);
+    if (copyStatus) copyStatus.textContent = ui.copied;
   } catch {
     copyBtn.classList.remove("is-copied");
-    if (copyStatus) copyStatus.textContent = "Copy failed. Select the command and copy it manually.";
+    if (copyStatus) copyStatus.textContent = ui.copyFailed;
   }
 
   window.clearTimeout(copyTimer);
   copyTimer = window.setTimeout(() => {
     copyBtn.classList.remove("is-copied");
-    copyBtn.setAttribute("aria-label", "Copy the Docker command");
+    copyBtn.setAttribute("aria-label", ui.copyLabel);
   }, 2000);
 });
 
@@ -222,9 +253,10 @@ async function upgradeDownloads() {
   const heroTitle = release.tag_name ? `Noting ${release.tag_name}` : "Noting";
 
   if (primary) {
+    const platformName = platform === "mac" ? "macOS" : platform === "win" ? "Windows" : "Linux";
     document.querySelectorAll("[data-download]:not([data-platform])").forEach((link) => {
       link.href = primary.browser_download_url;
-      link.title = `${heroTitle} for ${platform === "mac" ? "macOS" : platform === "win" ? "Windows" : "Linux"}`;
+      link.title = isZh ? `${heroTitle}（${platformName}）` : `${heroTitle} for ${platformName}`;
     });
   }
 

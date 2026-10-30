@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Noting · 真正属于你的工作空间</title>
+  <meta name="description" content="Noting 是一款开源、可自托管的笔记工作空间，包含块编辑器、嵌套页面、数据库，以及使用你自己密钥的 AI 面板。支持 macOS、Windows 和 Linux。" />
+  <meta name="theme-color" content="#faf8f5" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="canonical" href="https://jasonsun2009cn.github.io/Noting/zh.html" />
+  <link rel="alternate" hreflang="en" href="https://jasonsun2009cn.github.io/Noting/" />
+  <link rel="alternate" hreflang="zh-CN" href="https://jasonsun2009cn.github.io/Noting/zh.html" />
+  <link rel="alternate" hreflang="x-default" href="https://jasonsun2009cn.github.io/Noting/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Noting" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:title" content="Noting · 真正属于你的工作空间" />
+  <meta property="og:description" content="开源的块编辑器，包含嵌套页面、数据库，以及使用你自己密钥的 AI。每条笔记都保存在你电脑上的一个 SQLite 文件里。" />
+  <meta property="og:url" content="https://jasonsun2009cn.github.io/Noting/zh.html" />
+  <meta property="og:image" content="https://jasonsun2009cn.github.io/Noting/assets/og-zh.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Noting：真正属于你的工作空间，配图为应用界面截图" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Noting · 真正属于你的工作空间" />
+  <meta name="twitter:description" content="开源的块编辑器，包含嵌套页面、数据库，以及使用你自己密钥的 AI。每条笔记都保存在你电脑上的一个 SQLite 文件里。" />
+  <meta name="twitter:image" content="https://jasonsun2009cn.github.io/Noting/assets/og-zh.png" />
+
+  <link rel="preload" href="assets/fonts/geist-variable.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/fonts/geist-mono-variable.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="styles.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Noting",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "macOS, Windows, Linux",
+    "inLanguage": "zh-CN",
+    "description": "一款开源、可自托管的笔记工作空间，包含块编辑器、嵌套页面、数据库，以及使用你自己密钥的 AI 面板。",
+    "url": "https://jasonsun2009cn.github.io/Noting/zh.html",
+    "codeRepository": "https://github.com/JasonSun2009CN/Noting",
+    "license": "https://github.com/JasonSun2009CN/Noting/blob/main/LICENSE",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+
+  <header class="site-header">
+    <nav class="nav" aria-label="主导航">
+      <a class="brand" href="#top" aria-label="Noting，概览">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
+            <path d="M7 18V6h2.4l5.2 8V6H17v12h-2.4L9.4 10v8H7Z" fill="currentColor" />
+          </svg>
+        </span>
+        <span class="brand-name">Noting</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#top" aria-current="page">概览</a></li>
+        <li><a href="#features">功能</a></li>
+        <li><a href="#setup">安装</a></li>
+        <li><a href="#faq">常见问题</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a class="lang-switch" href="index.html" hreflang="en" lang="en" aria-label="Switch to English">EN</a>
+        <a class="icon-btn" href="https://github.com/JasonSun2009CN/Noting" target="_blank" rel="noopener" aria-label="在 GitHub 上查看 Noting（新标签页打开）">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+            <path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.9 1.2 1.9 1.2 1.1 1.9 2.9 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.7.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z" />
+          </svg>
+        </a>
+        <a class="btn btn-primary btn-sm" data-download href="https://github.com/JasonSun2009CN/Noting/releases">下载</a>
+        <button class="menu-toggle" type="button" aria-label="打开菜单" aria-expanded="false" aria-controls="menu-panel">
+          <span class="menu-toggle-box" aria-hidden="true"><i></i><i></i></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <div class="menu-panel" id="menu-panel" aria-hidden="true">
+    <nav class="menu-panel-inner" aria-label="移动端导航">
+      <a class="menu-link" href="#top">概览</a>
+      <a class="menu-link" href="#features">功能</a>
+      <a class="menu-link" href="#setup">安装</a>
+      <a class="menu-link" href="#faq">常见问题</a>
+      <a class="menu-link" href="https://github.com/JasonSun2009CN/Noting" target="_blank" rel="noopener">GitHub</a>
+      <a class="menu-link" href="index.html" hreflang="en" lang="en">English</a>
+      <a class="btn btn-primary menu-download" data-download href="https://github.com/JasonSun2009CN/Noting/releases">下载应用</a>
+    </nav>
+  </div>
+
+  <main id="main">
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="wrap hero-inner">
+        <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>开源 · Apache 2.0 · 离线可用</p>
+        <h1 class="hero-title" id="hero-title">真正属于你的<br />工作空间。</h1>
+        <p class="hero-sub">Noting 是一款开源的块编辑器，包含嵌套页面、数据库，以及使用你自己密钥的 AI 面板。每条笔记都保存在你电脑上的 SQLite 文件里，而不是别人的云端。</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" data-download href="https://github.com/JasonSun2009CN/Noting/releases">
+            下载应用
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 4v12m0 0 4.5-4.5M12 16l-4.5-4.5M5 20h14" />
+            </svg>
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/JasonSun2009CN/Noting" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+              <path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.9 1.2 1.9 1.2 1.1 1.9 2.9 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.7.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z" />
+            </svg>
+            查看源码
+          </a>
+        </div>
+        <p class="hero-note">完全免费且开源。无需账号，没有遥测，也没有同步服务。</p>
+      </div>
+
+      <div class="wrap">
+        <figure class="app-frame">
+          <div class="app-chrome" aria-hidden="true">
+            <span class="traffic"><i></i><i></i><i></i></span>
+            <span class="addr">localhost:4000</span>
+            <span class="chrome-spacer"></span>
+          </div>
+          <img src="assets/screenshot.png" width="2880" height="1720" alt="Noting 桌面版界面，左侧是嵌套页面列表，中间是一个带桃色与粉色封面的块编辑器页面。" />
+        </figure>
+      </div>
+    </section>
+
+    <section class="platforms" aria-label="支持的平台">
+      <div class="wrap platform-grid">
+        <a class="platform" data-download data-platform="mac" href="https://github.com/JasonSun2009CN/Noting/releases">
+          <span class="platform-name">macOS</span>
+          <span class="platform-meta">Apple 芯片与 Intel</span>
+          <svg class="platform-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" /></svg>
+        </a>
+        <a class="platform" data-download data-platform="win" href="https://github.com/JasonSun2009CN/Noting/releases">
+          <span class="platform-name">Windows</span>
+          <span class="platform-meta">Windows 10 与 11</span>
+          <svg class="platform-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" /></svg>
+        </a>
+        <a class="platform" data-download data-platform="linux" href="https://github.com/JasonSun2009CN/Noting/releases">
+          <span class="platform-name">Linux</span>
+          <span class="platform-meta">AppImage 与 deb 软件包</span>
+          <svg class="platform-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" /></svg>
+        </a>
+        <a class="platform" href="https://github.com/JasonSun2009CN/Noting#docker">
+          <span class="platform-name">Docker</span>
+          <span class="platform-meta">一个容器，一个数据卷</span>
+          <svg class="platform-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" /></svg>
+        </a>
+      </div>
+    </section>
+
+    <section class="tagline-section" aria-labelledby="tagline-title">
+      <div class="wrap">
+        <h2 class="tagline" id="tagline-title"><span data-tagline>你的笔记，不该存放在</span><br /><span data-tagline>你无法掌控的服务器上。</span></h2>
+      </div>
+    </section>
+
+    <section class="section" id="features" aria-labelledby="features-title">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="kicker">功能</p>
+          <h2 id="features-title">一个完整的笔记工作空间，<br />不用注册账号。</h2>
+          <p class="lead">编辑器、数据库和搜索都在本地运行。AI 面板是可选的，用的是你自己的密钥。</p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2" /><rect x="13" y="3" width="8" height="8" rx="2" /><rect x="3" y="13" width="8" height="8" rx="2" /><path d="M17 13v8M13 17h8" /></svg>
+            </span>
+            <h3>顺手的块编辑器</h3>
+            <p>打字、拖拽、缩进。标题、待办、折叠、标注和代码都是可以移动的块，也支持 Markdown 快捷输入。</p>
+          </article>
+
+          <article class="feature reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="8" ry="3" /><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13" /><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" /></svg>
+            </span>
+            <h3>数据表就在手边</h3>
+            <p>表格和看板视图，支持选择、日期、复选框和链接属性。可以排序、行内编辑，需要时再打开一行看详情。</p>
+          </article>
+
+          <article class="feature reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-4.2-4.2" /></svg>
+            </span>
+            <h3>搜索，不用翻找</h3>
+            <p>按 <kbd>⌘K</kbd> 就能打开页面和操作，全程不用碰鼠标。全文本搜索覆盖标题和每个块的内容。</p>
+          </article>
+
+          <article class="feature reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 13.8 9l5.7 1.8-5.7 1.9L12 18.4l-1.8-5.7L4.5 10.8 10.2 9 12 3.5Z" /><path d="M18.5 16.5 19 18l1.5.5-1.5.5-.5 1.5-.5-1.5L16.5 18l1.5-.5.5-1.5Z" /></svg>
+            </span>
+            <h3>用你自己的 AI 密钥</h3>
+            <p>支持 OpenAI、Anthropic、DeepSeek 或任何 OpenAI 兼容接口。密钥留在浏览器里，不会写入数据库。</p>
+          </article>
+
+          <article class="feature reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h9l5 5v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" /><path d="M14 4v5h5" /><path d="M8.5 14h7M8.5 17h4.5" /></svg>
+            </span>
+            <h3>所有笔记，一个文件</h3>
+            <p>页面、块、附件和数据库都在一个 SQLite 文件里。停掉服务，复制目录，备份就完成了。</p>
+          </article>
+
+          <article class="feature reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z" /></svg>
+            </span>
+            <h3>想暗就暗</h3>
+            <p>跟随系统，或自己选择亮色和暗色。应用在本地运行，断网也能继续写。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section setup" id="setup" aria-labelledby="setup-title">
+      <div class="wrap setup-grid">
+        <div class="setup-copy reveal">
+          <p class="kicker">安装</p>
+          <h2 id="setup-title">一分钟就能跑起来。</h2>
+          <ol class="steps">
+            <li class="step">
+              <span class="step-num" aria-hidden="true">01</span>
+              <div>
+                <h3>下载并安装</h3>
+                <p>在 GitHub Releases 里选择对应平台的安装包。桌面版会把笔记保存在系统的应用数据目录。</p>
+              </div>
+            </li>
+            <li class="step">
+              <span class="step-num" aria-hidden="true">02</span>
+              <div>
+                <h3>或者启动容器</h3>
+                <p>克隆仓库，运行一条命令。服务监听 4000 端口，所有数据保存在 Docker 卷里。</p>
+              </div>
+            </li>
+            <li class="step">
+              <span class="step-num" aria-hidden="true">03</span>
+              <div>
+                <h3>开始写</h3>
+                <p>首次运行会生成一个示例工作区。开始写自己的页面时删掉它就好。</p>
+              </div>
+            </li>
+          </ol>
+          <p class="setup-link">
+            <a class="text-link" href="https://github.com/JasonSun2009CN/Noting#quick-start" target="_blank" rel="noopener">
+              查看完整安装说明
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+            </a>
+          </p>
+        </div>
+
+        <div class="reveal">
+          <div class="terminal">
+            <div class="terminal-bar">
+              <span class="traffic traffic-dark" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="terminal-title">terminal</span>
+              <button class="copy-btn" type="button" data-copy="docker compose up -d --build" aria-label="复制 Docker 命令">
+                <svg class="copy-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M15 5.5V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h.5" /></svg>
+                <svg class="check-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7" /></svg>
+              </button>
+            </div>
+            <pre class="terminal-body"><code><span class="t-prompt">$</span> <span class="t-cmd">docker compose up -d --build</span>
+<span class="t-dim">  noting  built in 12.4s</span>
+<span class="t-dim">  noting  running</span>
+
+<span class="t-prompt">$</span> <span class="t-cmd">open http://localhost:4000</span></code></pre>
+            <span class="sr-only" role="status" aria-live="polite" data-copy-status></span>
+          </div>
+          <p class="data-note">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7c0-1.7 3.6-3 8-3s8 1.3 8 3v10c0 1.7-3.6 3-8 3s-8-1.3-8-3V7Z" /><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" /></svg>
+            数据保存在 <code>./data/noting.db</code> 以及旁边的 uploads 目录里。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="faq" aria-labelledby="faq-title">
+      <div class="wrap faq-grid">
+        <div class="faq-head reveal">
+          <p class="kicker">常见问题</p>
+          <h2 id="faq-title">大家都会问。</h2>
+          <p class="lead">迁移笔记之前，通常想先弄清楚这些。</p>
+        </div>
+
+        <div class="faq-list reveal">
+          <details class="faq-item">
+            <summary>Noting 真的免费吗？<span class="faq-icon" aria-hidden="true"></span></summary>
+            <div class="faq-body"><p>是。代码采用 Apache 2.0 协议，没有付费版、席位限制，也没有托管方案。你只需要为自己的硬件付费，以及在使用 AI 时为自己的密钥付费。</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>和 Notion 有什么区别？<span class="faq-icon" aria-hidden="true"></span></summary>
+            <div class="faq-body"><p>Notion 把页面存在他们的服务器上；Noting 把页面存在你可以打开、复制和备份的 SQLite 文件里。它也不含任何遥测，并允许你接入任何 OpenAI 兼容模型。</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>笔记存在哪里？<span class="faq-icon" aria-hidden="true"></span></summary>
+            <div class="faq-body"><p>桌面版存在系统的应用数据目录；Docker 版存在 <code>/data</code> 卷。无论哪种，都是一个 SQLite 文件加一个附件目录。</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>我的 AI 密钥会怎样？<span class="faq-icon" aria-hidden="true"></span></summary>
+            <div class="faq-body"><p>它只保存在浏览器的本地存储里，只有你发起请求时才会发送给你自己的 Noting 服务。服务再把请求转发给你选择的供应商。密钥不会写入 SQLite，也不会被记录。</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>AI 会看到我的整个工作区吗？<span class="faq-icon" aria-hidden="true"></span></summary>
+            <div class="faq-body"><p>不会。只有你从 AI 面板发送的文本，以及你主动附带的页面上下文，才会到达供应商。后台不会索引任何内容。</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>手机上能用吗？<span class="faq-icon" aria-hidden="true"></span></summary>
+            <div class="faq-body"><p>目前还没有移动端应用。你可以通过局域网或私有隧道在手机浏览器里打开服务。对公网开放前，请设置 <code>NOTING_PASSWORD</code> 并加上 HTTPS。</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>能从 Notion 或 Markdown 导入吗？<span class="faq-icon" aria-hidden="true"></span></summary>
+            <div class="faq-body"><p>暂时不能。页面目前可以导出为 Markdown。导入功能在计划中，SQLite 结构也很简单，等不及的话可以自己写脚本。</p></div>
+          </details>
+          <details class="faq-item">
+            <summary>安装包有签名吗？<span class="faq-icon" aria-hidden="true"></span></summary>
+            <div class="faq-body"><p>默认没有。首次打开时 macOS 可能要求右键选择打开。配置好 Apple 与 Windows 的签名密钥后，就会出现已签名的构建。</p></div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="section cta-section" aria-labelledby="cta-title">
+      <div class="wrap">
+        <div class="cta reveal">
+          <p class="kicker kicker-light">开始使用</p>
+          <h2 id="cta-title">你的笔记。你的电脑。</h2>
+          <p>下载桌面应用，或者自己运行服务。两种方式都只要一分钟，最后你会得到一个可以长期保存的文件。</p>
+          <div class="cta-actions">
+            <a class="btn btn-invert" data-download href="https://github.com/JasonSun2009CN/Noting/releases">下载应用</a>
+            <a class="btn btn-outline-light" href="https://github.com/JasonSun2009CN/Noting" target="_blank" rel="noopener">在 GitHub 查看</a>
+          </div>
+          <p class="cta-note">Apache 2.0 · 无需账号 · 离线可用</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="brand" href="#top" aria-label="Noting，回到顶部">
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true"><path d="M7 18V6h2.4l5.2 8V6H17v12h-2.4L9.4 10v8H7Z" fill="currentColor" /></svg>
+            </span>
+            <span class="brand-name">Noting</span>
+          </a>
+          <p>一个开源的笔记工作空间，包含块编辑器、数据库，以及使用你自己密钥的 AI 面板。</p>
+        </div>
+
+        <nav class="footer-col" aria-label="产品">
+          <h2>产品</h2>
+          <ul>
+            <li><a href="#features">功能</a></li>
+            <li><a href="#setup">安装</a></li>
+            <li><a href="https://github.com/JasonSun2009CN/Noting/releases">下载</a></li>
+            <li><a href="#faq">常见问题</a></li>
+          </ul>
+        </nav>
+
+        <nav class="footer-col" aria-label="项目">
+          <h2>项目</h2>
+          <ul>
+            <li><a href="https://github.com/JasonSun2009CN/Noting" target="_blank" rel="noopener">GitHub</a></li>
+            <li><a href="https://github.com/JasonSun2009CN/Noting/issues" target="_blank" rel="noopener">问题反馈</a></li>
+            <li><a href="https://github.com/JasonSun2009CN/Noting/blob/main/LICENSE" target="_blank" rel="noopener">许可证</a></li>
+            <li><a href="https://github.com/JasonSun2009CN/Noting#readme" target="_blank" rel="noopener">README</a></li>
+          </ul>
+        </nav>
+
+        <div class="footer-col">
+          <h2>本地优先</h2>
+          <ul>
+            <li>无 Cookie</li>
+            <li>无统计分析</li>
+            <li>无追踪脚本</li>
+            <li>字体由本站提供</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 Noting 贡献者</p>
+        <p class="footer-license"><a href="privacy-zh.html">隐私</a> · <a href="https://github.com/JasonSun2009CN/Noting/blob/main/LICENSE" target="_blank" rel="noopener">Apache 2.0</a> · 公开构建</p>
+      </div>
+    </div>
+  </footer>
+
+  <noscript>
+    <style>.reveal { opacity: 1; transform: none; }</style>
+  </noscript>
+  <script src="main.js" defer></script>
+</body>
+</html>

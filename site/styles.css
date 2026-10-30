@@ -43,7 +43,7 @@
 
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 
-  --font: "Geist", system-ui, -apple-system, sans-serif;
+  --font: "Geist", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
   --mono: "Geist Mono", ui-monospace, "SF Mono", monospace;
 }
 
@@ -366,6 +366,27 @@ section {
   background: var(--paper-2);
 }
 
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--muted);
+  transition:
+    background-color 0.3s var(--ease),
+    color 0.3s var(--ease);
+}
+
+.lang-switch:hover {
+  color: var(--ink);
+  background: var(--paper-2);
+}
+
 .menu-toggle {
   display: none;
   place-items: center;
@@ -484,6 +505,10 @@ section {
 
 .menu-panel.open .menu-link:nth-child(5) {
   transition-delay: 150ms;
+}
+
+.menu-panel.open .menu-link:nth-child(6) {
+  transition-delay: 180ms;
 }
 
 .menu-download {
@@ -727,6 +752,7 @@ section {
 }
 
 .tagline .word {
+  display: inline;
   color: #c9c2ba;
   transition: color 0.6s var(--ease);
 }
@@ -1291,6 +1317,12 @@ kbd {
   gap: 16px;
 }
 
+.legal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .legal-main {
   max-width: 760px;
   padding-top: 64px;
@@ -1359,6 +1391,56 @@ kbd {
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 16px;
+}
+
+/* --------------------------------------------------------------------------
+   Chinese typography
+   -------------------------------------------------------------------------- */
+
+html[lang="zh-CN"] body {
+  line-break: strict;
+}
+
+html[lang="zh-CN"] .hero-title {
+  letter-spacing: -0.01em;
+  line-height: 1.12;
+}
+
+html[lang="zh-CN"] .section-head h2,
+html[lang="zh-CN"] .setup-copy h2,
+html[lang="zh-CN"] .faq-head h2 {
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+
+html[lang="zh-CN"] .hero-sub {
+  text-wrap: balance;
+}
+
+html[lang="zh-CN"] .tagline {
+  letter-spacing: 0;
+  line-height: 1.35;
+}
+
+html[lang="zh-CN"] .cta h2 {
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+
+html[lang="zh-CN"] .faq-item summary,
+html[lang="zh-CN"] .brand-name,
+html[lang="zh-CN"] .platform-name,
+html[lang="zh-CN"] .feature h3,
+html[lang="zh-CN"] .step h3 {
+  letter-spacing: 0;
+}
+
+html[lang="zh-CN"] .eyebrow {
+  letter-spacing: 0.14em;
+}
+
+html[lang="zh-CN"] .footer-col h2 {
+  letter-spacing: 0.12em;
 }
 
 /* --------------------------------------------------------------------------
