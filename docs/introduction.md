@@ -8,7 +8,7 @@ Noting 是一个可以自己部署的笔记与知识库工具。它用起来像 
 
 - **在意数据归属的人**：笔记、图片、数据库都在 `data/` 目录里，备份就是复制一个文件夹。
 - **想在自己服务器或 NAS 上跑一个知识库的人**：一个 Node 进程 + 一个 SQLite 文件，没有外部依赖。
-- **想用 AI 但不想被绑定的人**：自带 API Key，支持 OpenAI、Anthropic、DeepSeek、Ollama 或任何兼容 OpenAI 的接口，随时可换。
+- **想用 AI 但不想被绑定的人**：自带 API Key，支持 OpenAI、Anthropic、DeepSeek、OrcaRouter、Ollama 或任何兼容 OpenAI 的接口，随时可换。
 - **个人、家庭或小团队**：不需要注册、不需要订阅，也没有用量限制。
 
 ## 你能做什么

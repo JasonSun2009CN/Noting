@@ -174,6 +174,7 @@ export const AI_PROVIDERS = [
   { id: 'openai', label: 'OpenAI', baseUrl: 'https://api.openai.com/v1', model: 'gpt-4o-mini' },
   { id: 'anthropic', label: 'Anthropic', baseUrl: 'https://api.anthropic.com', model: 'claude-sonnet-4-5' },
   { id: 'deepseek', label: 'DeepSeek', baseUrl: 'https://api.deepseek.com/v1', model: 'deepseek-chat' },
+  { id: 'orcarouter', label: 'OrcaRouter', baseUrl: 'https://api.orcarouter.ai/v1', model: 'orcarouter/auto' },
   { id: 'ollama', label: 'Ollama (local)', baseUrl: 'http://localhost:11434/v1', model: 'llama3.2' },
   { id: 'custom', label: 'Custom (OpenAI-compatible)', baseUrl: '', model: '' },
 ] as const;

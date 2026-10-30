@@ -562,6 +562,7 @@ const DEFAULT_BASE_URLS = {
   openai: 'https://api.openai.com/v1',
   anthropic: 'https://api.anthropic.com',
   deepseek: 'https://api.deepseek.com/v1',
+  orcarouter: 'https://api.orcarouter.ai/v1',
   ollama: 'http://localhost:11434/v1',
 };
 

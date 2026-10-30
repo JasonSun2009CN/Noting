@@ -19,7 +19,7 @@ file that you own.
   command palette, plus recent pages and quick actions.
 - **Trash** — restore pages or delete them forever.
 - **Dark mode** — light, dark, or follow the system.
-- **Bring your own AI** — OpenAI, Anthropic, DeepSeek, Ollama, or any
+- **Bring your own AI** — OpenAI, Anthropic, DeepSeek, OrcaRouter, Ollama, or any
   OpenAI-compatible endpoint. Your key stays in your browser and is sent only through
   your own Noting server to the provider you choose.
 - **Self-hosted** — one Node process and one SQLite file. Optional password protection,

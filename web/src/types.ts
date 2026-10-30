@@ -105,7 +105,7 @@ export interface SearchResult extends Page {
   parentTitle: string;
 }
 
-export type AIProvider = 'openai' | 'anthropic' | 'deepseek' | 'ollama' | 'custom';
+export type AIProvider = 'openai' | 'anthropic' | 'deepseek' | 'orcarouter' | 'ollama' | 'custom';
 
 export interface AIConfig {
   provider: AIProvider;
