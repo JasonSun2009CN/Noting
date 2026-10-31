@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  Check,
   ChevronDown,
   ChevronRight,
   Copy,
@@ -7,6 +8,8 @@ import {
   Download,
   FilePlus2,
   FileText,
+  Folder,
+  FolderPlus,
   MoreHorizontal,
   Moon,
   PanelLeftClose,
@@ -19,7 +22,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useApp } from '../context';
-import type { Page } from '../types';
+import type { Folder as FolderType, Page } from '../types';
 import { api } from '../api';
 import {
   cn,
@@ -46,18 +49,23 @@ function loadExpanded(): Set<string> {
 export default function Sidebar() {
   const {
     pages,
+    folders,
     currentPageId,
     navigatePage,
     navigateTrash,
     sidebarOpen,
     setSidebarOpen,
     createPage,
+    createFolder,
+    renameFolder,
+    deleteFolder,
     archivePage,
     duplicatePage,
     toggleFavorite,
     patchPage,
     updatePageLocal,
     toast,
+    confirm,
     settingsOpen,
     setSettingsOpen,
     theme,
@@ -75,6 +83,14 @@ export default function Sidebar() {
   const [expanded, setExpanded] = useState<Set<string>>(loadExpanded);
   const [favoritesOpen, setFavoritesOpen] = useState(true);
   const [privateOpen, setPrivateOpen] = useState(true);
+  const [openFolders, setOpenFolders] = useState<Set<string>>(new Set());
+  const [creatingFolder, setCreatingFolder] = useState(false);
+  const [folderDraft, setFolderDraft] = useState('');
+  const [renamingFolderId, setRenamingFolderId] = useState<string | null>(null);
+  const [folderNameDraft, setFolderNameDraft] = useState('');
+  const [folderMenu, setFolderMenu] = useState<{ folder: FolderType; anchor: HTMLElement } | null>(
+    null
+  );
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [draftTitle, setDraftTitle] = useState('');
   const [pageMenu, setPageMenu] = useState<{ page: Page; anchor: HTMLElement } | null>(null);
@@ -109,6 +125,18 @@ export default function Sidebar() {
   }, [currentPageId, pages]);
 
   useEffect(() => {
+    if (!currentPageId) return;
+    const page = pages.find((item) => item.id === currentPageId);
+    if (!page?.folderId) return;
+    setOpenFolders((current) => {
+      if (current.has(page.folderId!)) return current;
+      const next = new Set(current);
+      next.add(page.folderId!);
+      return next;
+    });
+  }, [currentPageId, pages]);
+
+  useEffect(() => {
     setWorkspaceDraft(workspaceName);
   }, [workspaceName]);
 
@@ -137,6 +165,67 @@ export default function Sidebar() {
       else next.add(id);
       return next;
     });
+  };
+
+  const toggleFolder = (id: string) => {
+    setOpenFolders((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const startCreateFolder = () => {
+    setFolderDraft('');
+    setCreatingFolder(true);
+  };
+
+  const commitCreateFolder = async () => {
+    const name = folderDraft.trim();
+    setCreatingFolder(false);
+    setFolderDraft('');
+    if (!name) return;
+    const folder = await createFolder(name);
+    if (folder) setOpenFolders((current) => new Set(current).add(folder.id));
+  };
+
+  const startRenameFolder = (folder: FolderType) => {
+    setFolderNameDraft(folder.name);
+    setRenamingFolderId(folder.id);
+    setFolderMenu(null);
+  };
+
+  const commitFolderRename = async (folder: FolderType) => {
+    const name = folderNameDraft.trim();
+    setRenamingFolderId(null);
+    if (!name || name === folder.name) return;
+    await renameFolder(folder.id, name);
+  };
+
+  const removeFolder = async (folder: FolderType) => {
+    setFolderMenu(null);
+    const ok = await confirm({
+      title: `Delete “${folder.name}”?`,
+      message: 'Pages inside will move to Private. No pages or notes are deleted.',
+      confirmLabel: 'Delete folder',
+      danger: true,
+    });
+    if (ok) await deleteFolder(folder.id);
+  };
+
+  const movePageToFolder = async (page: Page, folderId: string | null) => {
+    setPageMenu(null);
+    if ((page.folderId ?? null) === folderId) return;
+    const updated = await patchPage(page.id, { folderId });
+    if (!updated) return;
+    if (folderId) setOpenFolders((current) => new Set(current).add(folderId));
+    toast(folderId ? 'Moved to folder' : 'Removed from folder');
+  };
+
+  const createPageInFolder = async (folder: FolderType) => {
+    const page = await createPage({ folderId: folder.id });
+    if (page) setOpenFolders((current) => new Set(current).add(folder.id));
   };
 
   const startRename = (page: Page) => {
@@ -270,7 +359,7 @@ export default function Sidebar() {
     );
   };
 
-  const roots = childMap.get(null) || [];
+  const roots = (childMap.get(null) || []).filter((page) => !page.folderId);
 
   return (
     <>
@@ -391,6 +480,101 @@ export default function Sidebar() {
             </div>
           )}
 
+          {(folders.length > 0 || creatingFolder) && (
+            <div className="folders-area">
+              {creatingFolder && (
+                <div className="folder-create-row">
+                  <Folder size={14} className="folder-icon" />
+                  <input
+                    className="folder-name-input"
+                    autoFocus
+                    placeholder="Folder name"
+                    value={folderDraft}
+                    onChange={(event) => setFolderDraft(event.target.value)}
+                    onBlur={commitCreateFolder}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        event.preventDefault();
+                        event.currentTarget.blur();
+                      }
+                      if (event.key === 'Escape') {
+                        setCreatingFolder(false);
+                        setFolderDraft('');
+                      }
+                    }}
+                  />
+                </div>
+              )}
+
+              {folders.map((folder) => {
+                const isOpen = openFolders.has(folder.id);
+                const folderPages = (childMap.get(null) || []).filter(
+                  (page) => page.folderId === folder.id
+                );
+                return (
+                  <div className="sidebar-section folder-section" key={folder.id}>
+                    <div className="section-header">
+                      {renamingFolderId === folder.id ? (
+                        <input
+                          className="folder-name-input folder-rename-input"
+                          autoFocus
+                          value={folderNameDraft}
+                          onChange={(event) => setFolderNameDraft(event.target.value)}
+                          onBlur={() => commitFolderRename(folder)}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter') {
+                              event.preventDefault();
+                              event.currentTarget.blur();
+                            }
+                            if (event.key === 'Escape') setRenamingFolderId(null);
+                          }}
+                        />
+                      ) : (
+                        <button className="section-toggle folder-toggle" onClick={() => toggleFolder(folder.id)}>
+                          {isOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                          <Folder size={13} className="folder-icon" />
+                          <span className="folder-name">{folder.name}</span>
+                          {folderPages.length > 0 && (
+                            <span className="folder-count">{folderPages.length}</span>
+                          )}
+                        </button>
+                      )}
+                      <div className="section-actions">
+                        <button
+                          className="icon-btn tiny"
+                          title="New page in folder"
+                          onClick={() => createPageInFolder(folder)}
+                        >
+                          <Plus size={14} />
+                        </button>
+                        <button
+                          className="icon-btn tiny"
+                          title="Folder options"
+                          onClick={(event) =>
+                            setFolderMenu({ folder, anchor: event.currentTarget })
+                          }
+                        >
+                          <MoreHorizontal size={14} />
+                        </button>
+                      </div>
+                    </div>
+                    {isOpen &&
+                      (folderPages.length > 0 ? (
+                        <div className="page-tree">
+                          {folderPages.map((page) => renderPage(page, 0))}
+                        </div>
+                      ) : (
+                        <button className="sidebar-empty folder-empty" onClick={() => createPageInFolder(folder)}>
+                          <FilePlus2 size={14} />
+                          Add a page
+                        </button>
+                      ))}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           <div className="sidebar-section">
             <div className="section-header">
               <button className="section-toggle" onClick={() => setPrivateOpen(!privateOpen)}>
@@ -400,6 +584,9 @@ export default function Sidebar() {
               <div className="section-actions">
                 <button className="icon-btn tiny" title="New page" onClick={handleNewPage}>
                   <Plus size={14} />
+                </button>
+                <button className="icon-btn tiny" title="New folder" onClick={startCreateFolder}>
+                  <FolderPlus size={14} />
                 </button>
                 <button
                   className="icon-btn tiny"
@@ -541,6 +728,49 @@ export default function Sidebar() {
             handleNewDatabase();
           }}
         />
+        <MenuItem
+          icon={<FolderPlus size={16} />}
+          label="New folder"
+          onClick={() => {
+            setSectionMenu(null);
+            startCreateFolder();
+          }}
+        />
+      </Popover>
+
+      <Popover
+        open={!!folderMenu}
+        anchor={folderMenu?.anchor || null}
+        onClose={() => setFolderMenu(null)}
+        className="menu"
+        minWidth={220}
+      >
+        {folderMenu && (
+          <>
+            <MenuLabel>{folderMenu.folder.name}</MenuLabel>
+            <MenuItem
+              icon={<FolderPlus size={16} />}
+              label="New page in folder"
+              onClick={() => {
+                createPageInFolder(folderMenu.folder);
+                setFolderMenu(null);
+              }}
+            />
+            <MenuItem
+              icon={<FileText size={16} />}
+              label="Rename folder"
+              onClick={() => startRenameFolder(folderMenu.folder)}
+            />
+            <MenuSeparator />
+            <MenuItem
+              icon={<Trash2 size={16} />}
+              label="Delete folder"
+              danger
+              onClick={() => removeFolder(folderMenu.folder)}
+            />
+            <div className="menu-footnote">Pages move to Private, not to Trash.</div>
+          </>
+        )}
       </Popover>
 
       <Popover
@@ -599,6 +829,33 @@ export default function Sidebar() {
                 setPageMenu(null);
               }}
             />
+            {folders.length > 0 && (
+              <>
+                <MenuSeparator />
+                <MenuLabel>Move to folder</MenuLabel>
+                <MenuItem
+                  icon={pageMenu.page.folderId ? <Folder size={16} /> : <Check size={16} />}
+                  label="No folder"
+                  active={!pageMenu.page.folderId}
+                  onClick={() => movePageToFolder(pageMenu.page, null)}
+                />
+                {folders.map((folder) => (
+                  <MenuItem
+                    key={folder.id}
+                    icon={
+                      pageMenu.page.folderId === folder.id ? (
+                        <Check size={16} />
+                      ) : (
+                        <Folder size={16} />
+                      )
+                    }
+                    label={folder.name}
+                    active={pageMenu.page.folderId === folder.id}
+                    onClick={() => movePageToFolder(pageMenu.page, folder.id)}
+                  />
+                ))}
+              </>
+            )}
             <MenuItem
               icon={<Trash2 size={16} />}
               label="Move to trash"

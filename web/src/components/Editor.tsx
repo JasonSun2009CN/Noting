@@ -1,13 +1,16 @@
 import {
+  Fragment,
   forwardRef,
   useCallback,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type ClipboardEvent,
   type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
 } from 'react';
 import { createPortal, flushSync } from 'react-dom';
 import {
@@ -16,6 +19,7 @@ import {
   Bold,
   Check,
   CheckSquare,
+  ChevronDown,
   ChevronRight,
   Code2,
   Copy,
@@ -25,6 +29,7 @@ import {
   Heading1,
   Heading2,
   Heading3,
+  Heading4,
   Image as ImageIcon,
   IndentDecrease,
   IndentIncrease,
@@ -36,6 +41,7 @@ import {
   Minus,
   Plus,
   Quote,
+  RefreshCw,
   Sparkles,
   Strikethrough,
   Trash2,
@@ -44,6 +50,7 @@ import {
   Wand2,
   X,
 } from 'lucide-react';
+import katex from 'katex';
 import { useApp } from '../context';
 import { api } from '../api';
 import type { Block, BlockProps, BlockType } from '../types';
@@ -58,6 +65,7 @@ import {
   isCaretAtStart,
   isEditableBlock,
   isEmptyHtml,
+  isToggleBlock,
   sanitizePastedHtml,
   setCaret,
   splitHtmlAtCaret,
@@ -155,11 +163,27 @@ function defaultPropsFor(type: BlockType, previous: BlockProps): BlockProps {
     case 'todo':
       return { checked: previous.checked ?? false };
     case 'toggle':
-      return { collapsed: previous.collapsed ?? false };
+    case 'toggle_h1':
+    case 'toggle_h2':
+    case 'toggle_h3':
+    case 'toggle_h4':
+      return {
+        ...(previous.color ? { color: previous.color } : {}),
+        collapsed: previous.collapsed ?? false,
+      };
     case 'code':
       return { language: previous.language || 'plain text' };
     case 'callout':
       return { emoji: previous.emoji || '💡', color: previous.color || 'gray' };
+    case 'equation':
+      return { tex: previous.tex || '' };
+    case 'synced':
+      return { syncId: previous.syncId || uid() };
+    case 'columns':
+      return {
+        columns: Math.max(2, Math.min(5, previous.columns || 2)),
+        cells: previous.cells || [],
+      };
     case 'image':
       return previous;
     case 'page':
@@ -192,6 +216,147 @@ function groupEnd(blocks: Block[], start: number) {
   return end;
 }
 
+/** Caret range under a viewport point; Blink/WebKit and Firefox expose different APIs. */
+function caretRangeAtPoint(x: number, y: number): Range | null {
+  const doc = document as Document & {
+    caretRangeFromPoint?: (x: number, y: number) => Range | null;
+    caretPositionFromPoint?: (x: number, y: number) => CaretPosition | null;
+  };
+  if (typeof doc.caretRangeFromPoint === 'function') {
+    return doc.caretRangeFromPoint(x, y);
+  }
+  const position = doc.caretPositionFromPoint?.(x, y);
+  if (!position) return null;
+  const range = document.createRange();
+  range.setStart(position.offsetNode, position.offset);
+  range.collapse(true);
+  return range;
+}
+
+function blockRowAt(node: Node | null, root: HTMLElement): HTMLElement | null {
+  const element = node instanceof Element ? node : node?.parentElement ?? null;
+  const row = element?.closest('.block-row');
+  return row instanceof HTMLElement && root.contains(row) ? row : null;
+}
+
+function EquationBlock({
+  block,
+  onChange,
+}: {
+  block: Block;
+  onChange: (props: BlockProps) => void;
+}) {
+  const [editing, setEditing] = useState(() => !block.props.tex);
+  const tex = block.props.tex || '';
+  const html = useMemo(() => {
+    if (!tex.trim()) return '';
+    try {
+      return katex.renderToString(tex, { displayMode: true, throwOnError: false, strict: false });
+    } catch {
+      return escapeHtml(tex);
+    }
+  }, [tex]);
+
+  if (editing) {
+    return (
+      <div className="block-equation editing">
+        <textarea
+          autoFocus
+          value={tex}
+          placeholder="E = mc^2"
+          spellCheck={false}
+          onChange={(event) => onChange({ ...block.props, tex: event.target.value })}
+          onBlur={() => setEditing(false)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+              event.preventDefault();
+              setEditing(false);
+            }
+            if (event.key === 'Escape') setEditing(false);
+          }}
+          rows={2}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      className={cn('block-equation', !tex.trim() && 'empty')}
+      onClick={() => setEditing(true)}
+      title="Click to edit equation"
+    >
+      {tex.trim() ? (
+        <span dangerouslySetInnerHTML={{ __html: html }} />
+      ) : (
+        'Click to add an equation'
+      )}
+    </button>
+  );
+}
+
+function ColumnsBlock({
+  block,
+  onChange,
+  registerEditable,
+}: {
+  block: Block;
+  onChange: (props: BlockProps) => void;
+  registerEditable: (id: string, el: HTMLDivElement | null) => void;
+}) {
+  const count = Math.max(2, Math.min(5, block.props.columns || 2));
+  const cells = block.props.cells || [];
+  const refs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useLayoutEffect(() => {
+    for (let index = 0; index < count; index += 1) {
+      const el = refs.current[index];
+      const html = cells[index] || '';
+      if (el && document.activeElement !== el && el.innerHTML !== html) el.innerHTML = html;
+    }
+  }, [cells, count, block.id]);
+
+  useEffect(() => {
+    registerEditable(block.id, refs.current[0] || null);
+    return () => registerEditable(block.id, null);
+  }, [block.id, registerEditable]);
+
+  return (
+    <div className={cn('block-columns', `columns-${count}`)}>
+      {Array.from({ length: count }, (_, index) => (
+        <div
+          key={index}
+          ref={(el) => {
+            refs.current[index] = el;
+          }}
+          className="column-cell block-editable"
+          contentEditable
+          suppressContentEditableWarning
+          spellCheck
+          data-placeholder={`Column ${index + 1}`}
+          onInput={(event) => {
+            const next = Array.from({ length: count }, (_, cellIndex) =>
+              cellIndex === index ? event.currentTarget.innerHTML : cells[cellIndex] || ''
+            );
+            onChange({ ...block.props, columns: count, cells: next });
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+              event.preventDefault();
+              document.execCommand('insertLineBreak');
+              const next = Array.from({ length: count }, (_, cellIndex) =>
+                cellIndex === index ? event.currentTarget.innerHTML : cells[cellIndex] || ''
+              );
+              onChange({ ...block.props, columns: count, cells: next });
+            }
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
   { pageId, initialBlocks, onChange },
   ref
@@ -218,6 +383,8 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
   const [blockMenu, setBlockMenu] = useState<{ blockId: string; anchor: HTMLElement } | null>(null);
   const [emojiMenu, setEmojiMenu] = useState<{ blockId: string; anchor: HTMLElement } | null>(null);
   const [toolbar, setToolbar] = useState<{ top: number; left: number } | null>(null);
+  const [selectionBlockId, setSelectionBlockId] = useState<string | null>(null);
+  const [turnMenu, setTurnMenu] = useState<{ blockId: string; anchor: HTMLElement } | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<{ id: string; position: 'before' | 'after' } | null>(
     null
@@ -238,6 +405,11 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
   const saveVersion = useRef(0);
   const onChangeRef = useRef(onChange);
   const lastSelectedRange = useRef<Range | null>(null);
+  const dragSelect = useRef<{
+    anchorRow: HTMLElement | null;
+    extending: boolean;
+  } | null>(null);
+  const editLocked = useRef(false);
 
   useEffect(() => {
     onChangeRef.current = onChange;
@@ -342,8 +514,18 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
 
   const updateBlock = useCallback(
     (id: string, patch: Partial<Block>, save = true) => {
+      const target = blocksRef.current.find((block) => block.id === id);
+      const syncId = target?.type === 'synced' ? target.props.syncId : undefined;
       const next = blocksRef.current.map((block) => {
-        if (block.id !== id) return block;
+        const isTarget = block.id === id;
+        const isTwin =
+          !isTarget &&
+          Boolean(syncId) &&
+          block.type === 'synced' &&
+          block.props.syncId === syncId &&
+          patch.html !== undefined;
+        if (!isTarget && !isTwin) return block;
+        if (isTwin) return { ...block, html: patch.html as string };
         return {
           ...block,
           ...patch,
@@ -367,6 +549,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     setBlockMenu(null);
     setEmojiMenu(null);
     setToolbar(null);
+    setTurnMenu(null);
   }, []);
 
   const defaultIndent = useCallback((id: string) => {
@@ -413,6 +596,15 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       }
       if (type === 'paragraph' && current.type === 'code') {
         html = codeTextFromHtml(html).split('\n').map(escapeHtml).join('<br>');
+      }
+      if (current.type === 'equation' && type !== 'equation') {
+        html = escapeHtml(current.props.tex || '');
+      }
+      if (current.type === 'columns' && type !== 'columns') {
+        html = (current.props.cells || []).join('<br>');
+      }
+      if (type === 'equation' || type === 'columns' || type === 'page') {
+        html = '';
       }
 
       const props = defaultPropsFor(type, { ...current.props, ...(options?.props || {}) });
@@ -550,14 +742,14 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       if (LIST_TYPES.includes(block.type)) {
         newType = block.type;
         newProps = block.type === 'todo' ? { checked: false } : {};
-      } else if (block.type === 'toggle') {
+      } else if (isToggleBlock(block.type)) {
         newType = 'paragraph';
         newIndent = Math.min(8, block.indent + 1);
       }
 
       const nextBlock = newBlock(newType, after, newIndent, newProps);
       const current = { ...block, html: before, props: { ...block.props } };
-      if (block.type === 'toggle' && block.props.collapsed) {
+      if (isToggleBlock(block.type) && block.props.collapsed) {
         current.props.collapsed = false;
       }
 
@@ -579,7 +771,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         deleteBlock(block.id);
         return;
       }
-      if (previous.type === 'page' || previous.type === 'image' || previous.type === 'divider') {
+      if (previous.type === 'page' || previous.type === 'image' || previous.type === 'divider' || previous.type === 'columns') {
         return;
       }
       const mergedHtml = `${previous.html}${block.html}`;
@@ -603,6 +795,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       const nextBlock = blocksRef.current[index + 1];
       if (!nextBlock || !isEditableBlock(nextBlock)) return;
       if (nextBlock.type === 'code' || block.type === 'code') return;
+      if (nextBlock.type === 'columns' || block.type === 'columns') return;
       const mergedHtml = `${block.html}${nextBlock.html}`;
       const next = blocksRef.current
         .map((item) => (item.id === block.id ? { ...item, html: mergedHtml } : item))
@@ -646,6 +839,65 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       }
     },
     [applyBlocks, clearSlashText, focusBlock, pageId, refreshPages, toast]
+  );
+
+  const turnInto = useCallback(
+    async (blockId: string, type: BlockType, columns = 2) => {
+      const block = blocksRef.current.find((item) => item.id === blockId);
+      if (!block) return;
+      setTurnMenu(null);
+      setBlockMenu(null);
+      setToolbar(null);
+
+      if (type === 'page') {
+        if (block.type === 'page') return;
+        try {
+          const title = stripHtml(block.html).trim().slice(0, 500);
+          const payload = await api.createPage({ parentId: pageId, title });
+          await refreshPages();
+          const pageBlock: Block = {
+            ...block,
+            type: 'page',
+            html: '',
+            props: { pageId: payload.page.id },
+          };
+          const paragraph = newBlock('paragraph', '', block.indent);
+          const index = blocksRef.current.findIndex((item) => item.id === blockId);
+          if (index < 0) return;
+          const next = [...blocksRef.current];
+          next.splice(index, 1, pageBlock, paragraph);
+          applyBlocks(next);
+          focusBlock(paragraph.id, 'start');
+          toast('Subpage created');
+        } catch (error) {
+          toast(error instanceof Error ? error.message : 'Could not create the subpage.', 'error');
+        }
+        return;
+      }
+
+      if (type === 'columns') {
+        const existing = block.props.cells || [];
+        const cells = Array.from({ length: columns }, (_, index) =>
+          existing[index] ?? (index === 0 ? block.html : '')
+        );
+        applyType(blockId, 'columns', { props: { columns, cells }, focus: false });
+        return;
+      }
+
+      if (type === 'equation') {
+        const tex = block.type === 'equation' ? block.props.tex || '' : stripHtml(block.html);
+        applyType(blockId, 'equation', { props: { tex }, focus: false });
+        return;
+      }
+
+      if (type === 'synced') {
+        applyType(blockId, 'synced', { props: { syncId: block.props.syncId || uid() } });
+        return;
+      }
+
+      applyType(blockId, type);
+    },
+    [applyBlocks, applyType, focusBlock, pageId, refreshPages, toast]
   );
 
   const insertImage = useCallback(
@@ -791,6 +1043,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         '# ': 'h1',
         '## ': 'h2',
         '### ': 'h3',
+        '#### ': 'h4',
         '- ': 'bulleted',
         '* ': 'bulleted',
         '+ ': 'bulleted',
@@ -873,6 +1126,15 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       group: 'Basic blocks',
       keywords: ['h3'],
       action: () => { const b = slash && blocksRef.current.find((x) => x.id === slash.blockId); if (b) { clearSlashText(b.id); applyType(b.id, 'h3', { clear: true }); } },
+    },
+    {
+      id: 'h4',
+      label: 'Heading 4',
+      description: 'Smallest section heading.',
+      icon: <Heading4 size={18} />,
+      group: 'Basic blocks',
+      keywords: ['h4'],
+      action: () => { const b = slash && blocksRef.current.find((x) => x.id === slash.blockId); if (b) { clearSlashText(b.id); applyType(b.id, 'h4', { clear: true }); } },
     },
     {
       id: 'bulleted',
@@ -1010,10 +1272,53 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       ? filteredSlash[Math.min(slash.index, filteredSlash.length - 1)]
       : undefined;
 
+  /**
+   * Chromium keeps a selection inside one contentEditable editing host, so a
+   * cross-block selection is only possible while the blocks are not editable.
+   */
+  const setEditingLocked = useCallback((locked: boolean) => {
+    if (editLocked.current === locked) return;
+    editLocked.current = locked;
+    containerRef.current?.querySelectorAll<HTMLElement>('.block-editable').forEach((el) => {
+      el.contentEditable = locked ? 'false' : 'true';
+    });
+  }, []);
+
+  /** Each block is its own contentEditable, so the native ⌘A only covers one block. */
+  const selectAllBlocks = useCallback(() => {
+    const root = containerRef.current;
+    if (!root) return;
+    const editables = Array.from(root.querySelectorAll<HTMLElement>('.block-editable'));
+    setEditingLocked(true);
+    const range = document.createRange();
+    if (editables.length) {
+      const first = editables[0];
+      const last = editables[editables.length - 1];
+      range.setStart(first, 0);
+      range.setEnd(last, last.childNodes.length);
+    } else {
+      const blocksRoot = root.querySelector('.editor-blocks');
+      if (!blocksRoot) return;
+      range.selectNodeContents(blocksRoot);
+    }
+    const selection = window.getSelection();
+    if (!selection) return;
+    selection.removeAllRanges();
+    selection.addRange(range);
+    lastSelectedRange.current = range.cloneRange();
+    setToolbar(null);
+  }, [setEditingLocked]);
+
   const handleKeyDown = useCallback(
     (block: Block, index: number, event: ReactKeyboardEvent<HTMLDivElement>) => {
       const el = event.currentTarget;
       const mod = event.metaKey || event.ctrlKey;
+
+      if (mod && !event.shiftKey && !event.altKey && event.key.toLowerCase() === 'a') {
+        event.preventDefault();
+        selectAllBlocks();
+        return;
+      }
 
       if (slash && slash.blockId === block.id) {
         if (event.key === 'ArrowDown') {
@@ -1099,7 +1404,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         event.preventDefault();
 
         const empty = isEmptyHtml(el.innerHTML);
-        if (empty && (LIST_TYPES.includes(block.type) || block.type === 'toggle' || block.type === 'quote' || block.type === 'callout')) {
+        if (empty && (LIST_TYPES.includes(block.type) || isToggleBlock(block.type) || block.type === 'quote' || block.type === 'callout')) {
           if (block.indent > 0 && LIST_TYPES.includes(block.type)) {
             updateBlock(block.id, { indent: block.indent - 1 });
             return;
@@ -1206,6 +1511,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       insertBlockAfter,
       mergeWithNext,
       mergeWithPrevious,
+      selectAllBlocks,
       selectedSlashItem,
       setHtmlDirect,
       slash,
@@ -1216,22 +1522,35 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
   );
 
   const updateToolbar = useCallback(() => {
+    const root = containerRef.current;
     const selection = window.getSelection();
-    if (!selection || selection.isCollapsed || !selection.rangeCount) {
+    if (!root || !selection || selection.isCollapsed || !selection.rangeCount) {
       setToolbar(null);
+      setSelectionBlockId(null);
       return;
     }
     const range = selection.getRangeAt(0);
-    if (!containerRef.current?.contains(range.commonAncestorContainer)) {
+    if (!root.contains(range.commonAncestorContainer)) {
       setToolbar(null);
+      setSelectionBlockId(null);
+      return;
+    }
+    const startRow = blockRowAt(range.startContainer, root);
+    const endRow = blockRowAt(range.endContainer, root);
+    // Inline formatting only applies inside one block.
+    if (!startRow || !endRow || startRow !== endRow) {
+      setToolbar(null);
+      setSelectionBlockId(null);
       return;
     }
     lastSelectedRange.current = range.cloneRange();
     const rect = range.getBoundingClientRect();
     if (!rect.width && !rect.height) {
       setToolbar(null);
+      setSelectionBlockId(null);
       return;
     }
+    setSelectionBlockId(startRow.dataset.blockId || null);
     setToolbar({
       top: Math.max(58, rect.top - 46),
       left: Math.min(Math.max(80, rect.left + rect.width / 2), window.innerWidth - 80),
@@ -1244,6 +1563,99 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     window.addEventListener('scroll', hide, true);
     return () => window.removeEventListener('scroll', hide, true);
   }, [toolbar]);
+
+  /**
+   * Native selection is confined to one editing host, so as soon as a drag leaves
+   * the starting block we make the blocks read-only; the browser can then extend
+   * the normal document selection across the page. Editing resumes on the next
+   * click or keystroke, and stays available while copying.
+   */
+  useEffect(() => {
+    const onMouseMove = (event: MouseEvent) => {
+      const drag = dragSelect.current;
+      if (!drag) return;
+      if ((event.buttons & 1) === 0) {
+        dragSelect.current = null;
+        return;
+      }
+      if (editLocked.current) return;
+      const root = containerRef.current;
+      if (!root) return;
+      const current = caretRangeAtPoint(event.clientX, event.clientY);
+      if (!current) return;
+      const currentRow = blockRowAt(current.startContainer, root);
+      if (!drag.extending) {
+        if (!currentRow || currentRow === drag.anchorRow) return;
+        drag.extending = true;
+      }
+      setEditingLocked(true);
+      setToolbar(null);
+    };
+
+    const onMouseUp = () => {
+      dragSelect.current = null;
+    };
+
+    const onMouseDown = (event: MouseEvent) => {
+      if (event.button !== 0) return;
+      if (editLocked.current) setEditingLocked(false);
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!editLocked.current) return;
+      const mod = event.metaKey || event.ctrlKey;
+      const key = event.key.toLowerCase();
+      if (mod && !event.shiftKey && !event.altKey && key === 'a') {
+        event.preventDefault();
+        selectAllBlocks();
+        return;
+      }
+      if (mod && (key === 'c' || key === 'x')) return;
+      if (['Shift', 'Control', 'Alt', 'Meta', 'CapsLock'].includes(event.key)) return;
+      // Any other key ends the whole-page selection; keep the editor usable.
+      event.preventDefault();
+      setEditingLocked(false);
+      if (event.key === 'Escape') {
+        window.getSelection()?.removeAllRanges();
+        return;
+      }
+      const root = containerRef.current;
+      const editables = root ? Array.from(root.querySelectorAll<HTMLElement>('.block-editable')) : [];
+      if (!editables.length) return;
+      const toStart = event.key === 'ArrowLeft' || event.key === 'ArrowUp';
+      const target = toStart ? editables[0] : editables[editables.length - 1];
+      setCaret(target, toStart ? 'start' : 'end');
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('mousedown', onMouseDown, true);
+    window.addEventListener('keydown', onKeyDown, true);
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('mousedown', onMouseDown, true);
+      window.removeEventListener('keydown', onKeyDown, true);
+    };
+  }, [selectAllBlocks, setEditingLocked]);
+
+  const handleEditorMouseDown = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
+    if (event.button !== 0) return;
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target || target.closest('input, textarea, select, button, .block-controls')) return;
+    const root = containerRef.current;
+    if (!root) return;
+    const editable = target.closest('.block-editable');
+    if (!(editable instanceof HTMLElement) || !root.contains(editable)) return;
+    const anchor = caretRangeAtPoint(event.clientX, event.clientY);
+    if (!anchor) return;
+    dragSelect.current = {
+      anchorRow:
+        blockRowAt(anchor.startContainer, root) ??
+        (editable.closest('.block-row') as HTMLElement | null),
+      extending: false,
+    };
+  }, []);
 
   const syncSelectionBlock = useCallback(() => {
     const selection = window.getSelection();
@@ -1359,7 +1771,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     }
     if (hiddenAtIndent.length) return;
 
-    if (block.type === 'toggle' && block.props.collapsed) {
+    if (isToggleBlock(block.type) && block.props.collapsed) {
       hiddenAtIndent.push(block.indent);
     }
 
@@ -1619,6 +2031,68 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         );
         break;
 
+      case 'toggle_h1':
+      case 'toggle_h2':
+      case 'toggle_h3':
+      case 'toggle_h4': {
+        const level = block.type.slice(-1);
+        content = (
+          <div className="block-toggle toggle-heading">
+            <button
+              className={cn('toggle-arrow', !block.props.collapsed && 'expanded')}
+              onClick={() =>
+                updateBlock(block.id, {
+                  props: { ...block.props, collapsed: !block.props.collapsed },
+                })
+              }
+              aria-label={block.props.collapsed ? 'Expand' : 'Collapse'}
+            >
+              <ChevronRight size={15} />
+            </button>
+            <EditableBlock
+              {...editableProps}
+              className={cn(
+                'heading-text',
+                `heading-h${level}`,
+                block.props.color && `text-color-${block.props.color}`
+              )}
+              placeholder={`Toggle heading ${level}`}
+            />
+          </div>
+        );
+        break;
+      }
+
+      case 'equation':
+        content = (
+          <EquationBlock
+            block={block}
+            onChange={(props) => updateBlock(block.id, { props })}
+          />
+        );
+        break;
+
+      case 'columns':
+        content = (
+          <ColumnsBlock
+            block={block}
+            onChange={(props) => updateBlock(block.id, { props })}
+            registerEditable={registerEditable}
+          />
+        );
+        break;
+
+      case 'synced':
+        content = (
+          <div className="block-synced">
+            <div className="synced-label">
+              <RefreshCw size={11} /> Synced block
+            </div>
+            <EditableBlock {...editableProps} placeholder="Synced content" />
+          </div>
+        );
+        break;
+
       default:
         content = (
           <EditableBlock
@@ -1634,7 +2108,9 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
                   ? 'Heading 2'
                   : block.type === 'h3'
                     ? 'Heading 3'
-                    : "Type '/' for commands"
+                    : block.type === 'h4'
+                      ? 'Heading 4'
+                      : "Type '/' for commands"
             }
           />
         );
@@ -1656,9 +2132,24 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
   });
 
   const words = wordCount(blocks);
+  const selectedBlock = selectionBlockId
+    ? blocks.find((block) => block.id === selectionBlockId) || null
+    : null;
+  const currentTurn =
+    TURN_TYPES.find(
+      (item) =>
+        item.type === selectedBlock?.type &&
+        (item.type !== 'columns' || item.columns === (selectedBlock?.props.columns || 2))
+    ) || TURN_TYPES[0];
 
   return (
-    <div className="editor" ref={containerRef} onMouseUp={updateToolbar} onKeyUp={updateToolbar}>
+    <div
+      className="editor"
+      ref={containerRef}
+      onMouseDown={handleEditorMouseDown}
+      onMouseUp={updateToolbar}
+      onKeyUp={updateToolbar}
+    >
       <div className="editor-blocks">
         {visibleRows}
       </div>
@@ -1739,7 +2230,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
             const block = blocksRef.current.find((item) => item.id === blockMenu.blockId);
             if (!block) return null;
             const index = blocksRef.current.findIndex((item) => item.id === block.id);
-            const colorable = ['paragraph', 'h1', 'h2', 'h3', 'bulleted', 'numbered', 'todo', 'quote', 'callout'].includes(block.type);
+            const colorable = ['paragraph', 'h1', 'h2', 'h3', 'h4', 'bulleted', 'numbered', 'todo', 'toggle', 'toggle_h1', 'toggle_h2', 'toggle_h3', 'toggle_h4', 'quote', 'callout'].includes(block.type);
             return (
               <div className="block-menu">
                 {block.type !== 'image' && block.type !== 'page' && (
@@ -1748,12 +2239,14 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
                     <div className="turn-grid">
                       {TURN_TYPES.map((item) => (
                         <button
-                          key={item.type}
-                          className={cn('turn-button', block.type === item.type && 'active')}
-                          onClick={() => {
-                            applyType(block.id, item.type);
-                            setBlockMenu(null);
-                          }}
+                          key={`${item.type}-${item.label}`}
+                          className={cn(
+                            'turn-button',
+                            block.type === item.type &&
+                              (item.type !== 'columns' || (block.props.columns || 2) === item.columns) &&
+                              'active'
+                          )}
+                          onClick={() => turnInto(block.id, item.type, item.columns)}
                         >
                           <span className={`turn-glyph turn-${item.type}`}>{item.icon}</span>
                           <span>{item.label}</span>
@@ -1866,10 +2359,23 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       {toolbar &&
         createPortal(
           <div
-            className="inline-toolbar"
+            className={cn('inline-toolbar', turnMenu && 'toolbar-hidden')}
             style={{ top: toolbar.top, left: toolbar.left }}
             onMouseDown={(event) => event.preventDefault()}
           >
+            {selectionBlockId && (
+              <button
+                className="toolbar-turn"
+                title="Turn into"
+                onClick={(event) =>
+                  setTurnMenu({ blockId: selectionBlockId, anchor: event.currentTarget })
+                }
+              >
+                <span className="toolbar-turn-glyph">{currentTurn.icon}</span>
+                <ChevronDown size={11} />
+              </button>
+            )}
+            <span className="toolbar-separator" />
             <button title="Bold" onClick={() => format('bold')}>
               <Bold size={14} />
             </button>
@@ -1896,6 +2402,41 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
           </div>,
           document.body
         )}
+
+      <Popover
+        open={!!turnMenu}
+        anchor={turnMenu?.anchor || null}
+        onClose={() => setTurnMenu(null)}
+        placement="top-start"
+        className="turn-popover"
+        minWidth={230}
+      >
+        <div className="turn-list">
+          {TURN_TYPES.map((item, index) => (
+            <Fragment key={`${item.type}-${item.label}`}>
+              {(index === 0 || TURN_TYPES[index - 1].group !== item.group) && (
+                <div className="turn-group-label">{item.group}</div>
+              )}
+              <button
+                type="button"
+                className={cn(
+                  'turn-list-item',
+                  selectedBlock?.type === item.type &&
+                    (item.type !== 'columns' ||
+                      (selectedBlock?.props.columns || 2) === item.columns) &&
+                    'active'
+                )}
+                onClick={() => {
+                  if (turnMenu) turnInto(turnMenu.blockId, item.type, item.columns);
+                }}
+              >
+                <span className={`turn-glyph turn-${item.type}`}>{item.icon}</span>
+                <span>{item.label}</span>
+              </button>
+            </Fragment>
+          ))}
+        </div>
+      </Popover>
 
       <Modal
         open={!!imageDialog}

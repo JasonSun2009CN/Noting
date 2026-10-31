@@ -8,11 +8,14 @@ file that you own.
 
 ## Features
 
-- **Block editor** — headings, lists, to-dos, toggles, quotes, callouts, code blocks,
-  dividers, images, and nested sub-pages. Markdown shortcuts (`## `, `- `, `[] `, `> `,
-  ` ``` `), a slash menu, drag-to-reorder, and keyboard formatting.
+- **Block editor** — headings 1–4, lists, to-dos, toggles, toggle headings, quotes,
+  callouts, code blocks, equations, synced blocks, columns, dividers, images, and nested
+  sub-pages. Markdown shortcuts (`## `, `- `, `[] `, `> `, ` ``` `), a slash menu,
+  drag-to-reorder, and keyboard formatting.
 - **Nested pages** — unlimited page trees, favorites, emoji icons, covers, and
   per-page typography.
+- **Folders** — group top-level pages into collapsible folders in the sidebar, then
+  move pages in or out from the page menu.
 - **Databases** — table and board views, custom properties (text, number, select,
   multi-select, checkbox, URL, date), sorting, inline editing, and a row detail view.
 - **Search** — full-text search across titles and content with a keyboard-first
@@ -117,6 +120,7 @@ key when it is available on the same machine as the server.
 
 | Shortcut | Action |
 | --- | --- |
+| `⌘A` / `Ctrl+A` | Select all blocks on the page |
 | `⌘K` / `Ctrl+K` | Search pages and actions |
 | `⌘J` / `Ctrl+J` | Open the AI panel |
 | `⌘\` / `Ctrl+\` | Toggle the sidebar |

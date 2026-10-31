@@ -5,6 +5,7 @@ import type {
   Database,
   DbProp,
   DbRow,
+  Folder,
   Page,
   PagePayload,
   PageType,
@@ -39,8 +40,25 @@ export const api = {
 
   getPage: (id: string) => request<PagePayload>(`/api/pages/${id}`),
 
-  createPage: (input: { parentId?: string | null; type?: PageType; title?: string; icon?: string }) =>
-    request<PagePayload>('/api/pages', { method: 'POST', body: JSON.stringify(input) }),
+  createPage: (input: {
+    parentId?: string | null;
+    folderId?: string | null;
+    type?: PageType;
+    title?: string;
+    icon?: string;
+  }) => request<PagePayload>('/api/pages', { method: 'POST', body: JSON.stringify(input) }),
+
+  createFolder: (name: string) =>
+    request<{ folder: Folder }>('/api/folders', { method: 'POST', body: JSON.stringify({ name }) }),
+
+  renameFolder: (id: string, name: string) =>
+    request<{ folder: Folder }>(`/api/folders/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ name }),
+    }),
+
+  deleteFolder: (id: string) =>
+    request<{ ok: boolean }>(`/api/folders/${id}`, { method: 'DELETE' }),
 
   patchPage: (id: string, patch: Partial<Page>) =>
     request<{ page: Page }>(`/api/pages/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),

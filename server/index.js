@@ -12,12 +12,15 @@ import {
   descendantIds,
   getBlocks,
   getDatabase,
+  getFolders,
   getMeta,
   getPage,
   getPageRow,
+  nextFolderSortOrder,
   nextSortOrder,
   now,
   parseBlock,
+  parseFolder,
   parsePage,
   parseProp,
   parseRow,
@@ -66,6 +69,7 @@ api.get('/bootstrap', (req, res) => {
     .get().n;
   res.json({
     pages,
+    folders: getFolders(),
     favorites: pages.filter((page) => page.favorite).map((page) => page.id),
     workspace: { name: getMeta('workspace_name', 'My Workspace') },
     trashCount,
@@ -77,6 +81,38 @@ api.patch('/workspace', (req, res) => {
   if (!name) return res.status(400).json({ error: 'Workspace name is required.' });
   setMeta('workspace_name', name);
   res.json({ name });
+});
+
+api.post('/folders', (req, res) => {
+  const name = String(req.body?.name || '').trim().slice(0, 120);
+  if (!name) return res.status(400).json({ error: 'Folder name is required.' });
+  const id = uid();
+  db.prepare('INSERT INTO folders (id, name, sort_order, created_at) VALUES (?, ?, ?, ?)').run(
+    id,
+    name,
+    nextFolderSortOrder(),
+    now()
+  );
+  res.status(201).json({ folder: parseFolder(db.prepare('SELECT * FROM folders WHERE id = ?').get(id)) });
+});
+
+api.patch('/folders/:id', (req, res) => {
+  const row = db.prepare('SELECT * FROM folders WHERE id = ?').get(req.params.id);
+  if (!row) return res.status(404).json({ error: 'Folder not found.' });
+  const name = String(req.body?.name ?? '').trim().slice(0, 120);
+  if (!name) return res.status(400).json({ error: 'Folder name is required.' });
+  db.prepare('UPDATE folders SET name = ? WHERE id = ?').run(name, row.id);
+  res.json({ folder: parseFolder(db.prepare('SELECT * FROM folders WHERE id = ?').get(row.id)) });
+});
+
+api.delete('/folders/:id', (req, res) => {
+  const row = db.prepare('SELECT * FROM folders WHERE id = ?').get(req.params.id);
+  if (!row) return res.status(404).json({ error: 'Folder not found.' });
+  db.transaction(() => {
+    db.prepare('UPDATE pages SET folder_id = NULL WHERE folder_id = ?').run(row.id);
+    db.prepare('DELETE FROM folders WHERE id = ?').run(row.id);
+  })();
+  res.json({ ok: true });
 });
 
 api.get('/pages/:id', (req, res) => {
@@ -92,6 +128,10 @@ api.post('/pages', (req, res) => {
   if (parentId && !getPageRow(parentId)) {
     return res.status(400).json({ error: 'Parent page not found.' });
   }
+  const folderId = parentId ? null : req.body?.folderId || null;
+  if (folderId && !db.prepare('SELECT id FROM folders WHERE id = ?').get(folderId)) {
+    return res.status(400).json({ error: 'Folder not found.' });
+  }
   const type = req.body?.type === 'database' ? 'database' : 'page';
   const id = uid();
   const timestamp = now();
@@ -100,11 +140,12 @@ api.post('/pages', (req, res) => {
 
   db.transaction(() => {
     db.prepare(
-      `INSERT INTO pages (id, parent_id, title, icon, cover, type, favorite, archived, sort_order, settings, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, 0, 0, ?, '{}', ?, ?)`
+      `INSERT INTO pages (id, parent_id, folder_id, title, icon, cover, type, favorite, archived, sort_order, settings, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, ?, '{}', ?, ?)`
     ).run(
       id,
       parentId,
+      folderId,
       title,
       req.body?.icon ? String(req.body.icon).slice(0, 32) : null,
       req.body?.cover ? String(req.body.cover).slice(0, 4000) : null,
@@ -156,9 +197,21 @@ api.patch('/pages/:id', (req, res) => {
       if (parentId === row.id || descendantIds(row.id).includes(parentId)) {
         return res.status(400).json({ error: 'A page cannot be moved inside itself.' });
       }
+      updates.folder_id = null;
     }
     updates.parent_id = parentId;
     updates.sort_order = nextPageSortOrder(parentId);
+  }
+  if (body.folderId !== undefined) {
+    const folderId = body.folderId || null;
+    if (folderId && !db.prepare('SELECT id FROM folders WHERE id = ?').get(folderId)) {
+      return res.status(400).json({ error: 'Folder not found.' });
+    }
+    updates.folder_id = folderId;
+    if (folderId) {
+      updates.parent_id = null;
+      updates.sort_order = nextPageSortOrder(null);
+    }
   }
   if (body.settings && typeof body.settings === 'object') {
     updates.settings = JSON.stringify({
@@ -196,11 +249,12 @@ function duplicatePage(pageId, parentId, title) {
   const timestamp = now();
   const sortOrder = nextPageSortOrder(parentId);
   db.prepare(
-    `INSERT INTO pages (id, parent_id, title, icon, cover, type, favorite, archived, sort_order, settings, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?, ?)`
+    `INSERT INTO pages (id, parent_id, folder_id, title, icon, cover, type, favorite, archived, sort_order, settings, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?, ?)`
   ).run(
     id,
     parentId,
+    parentId === null ? source.folder_id ?? null : null,
     title ?? source.title,
     source.icon,
     source.cover,
@@ -335,15 +389,23 @@ api.put('/pages/:id/blocks', (req, res) => {
   const insert = db.prepare(
     `INSERT INTO blocks (id, page_id, type, html, props, indent, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)`
   );
+  const sync = db.prepare(
+    `INSERT INTO synced_blocks (id, html, updated_at) VALUES (?, ?, ?)
+     ON CONFLICT(id) DO UPDATE SET html = excluded.html, updated_at = excluded.updated_at`
+  );
+  const timestamp = now();
   db.transaction(() => {
     db.prepare('DELETE FROM blocks WHERE page_id = ?').run(page.id);
     blocks.forEach((block, index) => {
       insert.run(block.id, page.id, block.type, block.html, JSON.stringify(block.props), block.indent, index);
+      if (block.type === 'synced' && block.props.syncId) {
+        sync.run(block.props.syncId, block.html, timestamp);
+      }
     });
-    db.prepare('UPDATE pages SET updated_at = ? WHERE id = ?').run(now(), page.id);
+    db.prepare('UPDATE pages SET updated_at = ? WHERE id = ?').run(timestamp, page.id);
   })();
 
-  res.json({ ok: true, savedAt: now() });
+  res.json({ ok: true, savedAt: timestamp });
 });
 
 api.patch('/pages/:id/archive', (req, res) => {

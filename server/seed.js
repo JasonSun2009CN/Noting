@@ -335,7 +335,7 @@ const isMain = process.argv[1]
 
 if (isMain && process.argv.includes('--force')) {
   db.transaction(() => {
-    db.exec('DELETE FROM blocks; DELETE FROM db_rows; DELETE FROM db_props; DELETE FROM pages; DELETE FROM meta;');
+    db.exec('DELETE FROM blocks; DELETE FROM db_rows; DELETE FROM db_props; DELETE FROM pages; DELETE FROM folders; DELETE FROM synced_blocks; DELETE FROM meta;');
     seedDatabase();
   })();
   console.log('Seed data recreated.');

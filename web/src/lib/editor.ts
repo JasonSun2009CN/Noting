@@ -6,16 +6,27 @@ export const EDITABLE_TYPES: BlockType[] = [
   'h1',
   'h2',
   'h3',
+  'h4',
   'bulleted',
   'numbered',
   'todo',
   'toggle',
+  'toggle_h1',
+  'toggle_h2',
+  'toggle_h3',
+  'toggle_h4',
   'quote',
   'callout',
   'code',
+  'synced',
+  'columns',
 ];
 
 export const LIST_TYPES: BlockType[] = ['bulleted', 'numbered', 'todo'];
+
+export function isToggleBlock(type: BlockType) {
+  return type === 'toggle' || type.startsWith('toggle_h');
+}
 
 export const CODE_LANGUAGES = [
   'plain text',
@@ -180,16 +191,34 @@ export function wordCount(blocks: Block[]) {
   return cjk + latin;
 }
 
-export const TURN_TYPES: { type: BlockType; label: string; icon: string }[] = [
-  { type: 'paragraph', label: 'Text', icon: 'T' },
-  { type: 'h1', label: 'Heading 1', icon: 'H1' },
-  { type: 'h2', label: 'Heading 2', icon: 'H2' },
-  { type: 'h3', label: 'Heading 3', icon: 'H3' },
-  { type: 'bulleted', label: 'Bulleted list', icon: '•' },
-  { type: 'numbered', label: 'Numbered list', icon: '1.' },
-  { type: 'todo', label: 'To-do list', icon: '☑' },
-  { type: 'toggle', label: 'Toggle', icon: '▸' },
-  { type: 'quote', label: 'Quote', icon: '❝' },
-  { type: 'callout', label: 'Callout', icon: '💡' },
-  { type: 'code', label: 'Code', icon: '</>' },
+export const TURN_TYPES: {
+  type: BlockType;
+  label: string;
+  icon: string;
+  group: string;
+  columns?: number;
+}[] = [
+  { type: 'paragraph', label: 'Text', icon: 'T', group: 'Basic' },
+  { type: 'h1', label: 'Heading 1', icon: 'H1', group: 'Basic' },
+  { type: 'h2', label: 'Heading 2', icon: 'H2', group: 'Basic' },
+  { type: 'h3', label: 'Heading 3', icon: 'H3', group: 'Basic' },
+  { type: 'h4', label: 'Heading 4', icon: 'H4', group: 'Basic' },
+  { type: 'page', label: 'Page', icon: '▤', group: 'Basic' },
+  { type: 'bulleted', label: 'Bulleted list', icon: '•', group: 'Lists' },
+  { type: 'numbered', label: 'Numbered list', icon: '1.', group: 'Lists' },
+  { type: 'todo', label: 'To-do list', icon: '☑', group: 'Lists' },
+  { type: 'toggle', label: 'Toggle list', icon: '▸', group: 'Lists' },
+  { type: 'code', label: 'Code', icon: '</>', group: 'Blocks' },
+  { type: 'quote', label: 'Quote', icon: '❝', group: 'Blocks' },
+  { type: 'callout', label: 'Callout', icon: '💡', group: 'Blocks' },
+  { type: 'equation', label: 'Block equation', icon: '∑', group: 'Blocks' },
+  { type: 'synced', label: 'Synced block', icon: '⟳', group: 'Blocks' },
+  { type: 'toggle_h1', label: 'Toggle heading 1', icon: '▸H1', group: 'Toggle headings' },
+  { type: 'toggle_h2', label: 'Toggle heading 2', icon: '▸H2', group: 'Toggle headings' },
+  { type: 'toggle_h3', label: 'Toggle heading 3', icon: '▸H3', group: 'Toggle headings' },
+  { type: 'toggle_h4', label: 'Toggle heading 4', icon: '▸H4', group: 'Toggle headings' },
+  { type: 'columns', label: '2 columns', icon: '▥', group: 'Layout', columns: 2 },
+  { type: 'columns', label: '3 columns', icon: '▥', group: 'Layout', columns: 3 },
+  { type: 'columns', label: '4 columns', icon: '▥', group: 'Layout', columns: 4 },
+  { type: 'columns', label: '5 columns', icon: '▥', group: 'Layout', columns: 5 },
 ];

@@ -503,6 +503,72 @@ input[type='number'] {
   flex-direction: column;
 }
 
+/* Folders */
+
+.folders-area {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+}
+
+.folder-section {
+  margin-top: 2px;
+}
+
+.folder-toggle {
+  min-width: 0;
+  color: var(--text-secondary);
+}
+
+.folder-icon {
+  flex-shrink: 0;
+  color: var(--text-tertiary);
+}
+
+.folder-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder-count {
+  margin-left: 3px;
+  color: var(--text-tertiary);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.folder-create-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 2px 4px;
+  padding: 3px 7px;
+}
+
+.folder-name-input {
+  flex: 1;
+  min-width: 0;
+  padding: 3px 6px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  outline: none;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12.5px;
+}
+
+.folder-rename-input {
+  margin: 1px 4px;
+}
+
+.folder-empty {
+  padding-left: 26px;
+  font-size: 12.5px;
+}
+
 .page-row {
   position: relative;
   display: flex;

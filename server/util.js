@@ -7,13 +7,21 @@ const ALLOWED_BLOCK_TYPES = new Set([
   'h1',
   'h2',
   'h3',
+  'h4',
   'bulleted',
   'numbered',
   'todo',
   'toggle',
+  'toggle_h1',
+  'toggle_h2',
+  'toggle_h3',
+  'toggle_h4',
   'quote',
   'callout',
   'code',
+  'equation',
+  'synced',
+  'columns',
   'divider',
   'image',
   'page',
@@ -61,7 +69,10 @@ export function sanitizeBlocks(input) {
     blocks.push({
       id: String(raw.id).slice(0, 64),
       type,
-      html: type === 'divider' || type === 'image' || type === 'page' ? '' : cleanHtml(raw.html || ''),
+      html:
+        type === 'divider' || type === 'image' || type === 'page' || type === 'equation' || type === 'columns'
+          ? ''
+          : cleanHtml(raw.html || ''),
       props: sanitizeProps(type, props),
       indent: Math.max(0, Math.min(8, Number(raw.indent) || 0)),
     });
@@ -75,7 +86,7 @@ function sanitizeProps(type, props) {
     typeof value === 'string' ? value.slice(0, max) : undefined;
 
   if (type === 'todo') out.checked = !!props.checked;
-  if (type === 'toggle') out.collapsed = !!props.collapsed;
+  if (type === 'toggle' || type.startsWith('toggle_h')) out.collapsed = !!props.collapsed;
   if (type === 'code') out.language = str(props.language, 40) || 'plain text';
   if (type === 'callout') {
     out.emoji = str(props.emoji, 16) || '💡';
@@ -86,11 +97,27 @@ function sanitizeProps(type, props) {
     out.caption = str(props.caption, 500) || '';
   }
   if (type === 'page') out.pageId = str(props.pageId, 64) || '';
+  if (type === 'equation') out.tex = str(props.tex, 20000) || '';
+  if (type === 'synced') out.syncId = str(props.syncId, 64) || '';
+  if (type === 'columns') {
+    const count = Math.max(2, Math.min(5, Number(props.columns) || 2));
+    const cells = Array.isArray(props.cells) ? props.cells.slice(0, count) : [];
+    out.columns = count;
+    out.cells = Array.from({ length: count }, (_, index) => cleanHtml(cells[index] || ''));
+  }
   if (type === 'paragraph' || type === 'quote' || type === 'callout') {
     const color = str(props.color, 24);
     if (color) out.color = color;
   }
-  if (type === 'numbered' || type === 'bulleted') {
+  if (
+    type === 'numbered' ||
+    type === 'bulleted' ||
+    type === 'h1' ||
+    type === 'h2' ||
+    type === 'h3' ||
+    type === 'h4' ||
+    type.startsWith('toggle_h')
+  ) {
     const color = str(props.color, 24);
     if (color) out.color = color;
   }
@@ -173,6 +200,21 @@ export function blocksToMarkdown(page, blocks, database) {
       case 'h3':
         lines.push(`### ${text}`);
         break;
+      case 'h4':
+        lines.push(`#### ${text}`);
+        break;
+      case 'toggle_h1':
+        lines.push(`# ${text}`);
+        break;
+      case 'toggle_h2':
+        lines.push(`## ${text}`);
+        break;
+      case 'toggle_h3':
+        lines.push(`### ${text}`);
+        break;
+      case 'toggle_h4':
+        lines.push(`#### ${text}`);
+        break;
       case 'bulleted':
         lines.push(`${indent}- ${text}`);
         break;
@@ -191,6 +233,16 @@ export function blocksToMarkdown(page, blocks, database) {
       case 'callout':
         lines.push(`> ${block.props?.emoji || '💡'} ${text}`);
         break;
+      case 'equation':
+        lines.push('$$');
+        lines.push(block.props?.tex || '');
+        lines.push('$$');
+        break;
+      case 'columns': {
+        const cells = (block.props?.cells || []).map((cell) => htmlToMarkdown(cell)).filter(Boolean);
+        if (cells.length) lines.push(cells.join(' | '));
+        break;
+      }
       case 'code':
         lines.push('```' + (block.props?.language && block.props.language !== 'plain text' ? block.props.language : ''));
         lines.push(htmlToText(block.html));

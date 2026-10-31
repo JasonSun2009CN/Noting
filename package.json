@@ -26,6 +26,7 @@
     "better-sqlite3": "^13.0.3",
     "compression": "^1.7.5",
     "express": "^4.21.2",
+    "katex": "^0.19.1",
     "multer": "^2.5.0",
     "sanitize-html": "^2.14.0"
   },

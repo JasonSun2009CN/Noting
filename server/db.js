@@ -21,9 +21,17 @@ db.exec(`
     value TEXT NOT NULL
   );
 
+  CREATE TABLE IF NOT EXISTS folders (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL DEFAULT '',
+    sort_order REAL NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL
+  );
+
   CREATE TABLE IF NOT EXISTS pages (
     id TEXT PRIMARY KEY,
     parent_id TEXT REFERENCES pages(id) ON DELETE CASCADE,
+    folder_id TEXT REFERENCES folders(id) ON DELETE SET NULL,
     title TEXT NOT NULL DEFAULT '',
     icon TEXT,
     cover TEXT,
@@ -36,6 +44,12 @@ db.exec(`
     updated_at INTEGER NOT NULL
   );
   CREATE INDEX IF NOT EXISTS pages_parent ON pages(parent_id, sort_order);
+
+  CREATE TABLE IF NOT EXISTS synced_blocks (
+    id TEXT PRIMARY KEY,
+    html TEXT NOT NULL DEFAULT '',
+    updated_at INTEGER NOT NULL
+  );
 
   CREATE TABLE IF NOT EXISTS blocks (
     id TEXT PRIMARY KEY,
@@ -70,6 +84,13 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS db_rows_page ON db_rows(page_id, sort_order);
 `);
 
+// There is no migration framework: add new columns defensively for existing databases.
+const pageColumns = db.prepare('PRAGMA table_info(pages)').all();
+if (!pageColumns.some((column) => column.name === 'folder_id')) {
+  db.exec('ALTER TABLE pages ADD COLUMN folder_id TEXT REFERENCES folders(id) ON DELETE SET NULL');
+}
+db.exec('CREATE INDEX IF NOT EXISTS pages_folder ON pages(folder_id, sort_order)');
+
 export const now = () => Date.now();
 
 export function getMeta(key, fallback = null) {
@@ -88,6 +109,7 @@ export function parsePage(row) {
   return {
     id: row.id,
     parentId: row.parent_id,
+    folderId: row.folder_id ?? null,
     title: row.title,
     icon: row.icon,
     cover: row.cover,
@@ -108,6 +130,15 @@ export function parseBlock(row) {
     html: row.html,
     props: safeParse(row.props, {}),
     indent: row.indent,
+  };
+}
+
+export function parseFolder(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    sortOrder: row.sort_order,
+    createdAt: row.created_at,
   };
 }
 
@@ -152,10 +183,30 @@ export function getPageRow(id) {
 }
 
 export function getBlocks(pageId) {
-  return db
+  const blocks = db
     .prepare('SELECT * FROM blocks WHERE page_id = ? ORDER BY sort_order ASC, rowid ASC')
     .all(pageId)
     .map(parseBlock);
+  const synced = new Map(
+    db.prepare('SELECT id, html FROM synced_blocks').all().map((row) => [row.id, row.html])
+  );
+  return blocks.map((block) =>
+    block.type === 'synced' && block.props.syncId && synced.has(block.props.syncId)
+      ? { ...block, html: synced.get(block.props.syncId) }
+      : block
+  );
+}
+
+export function getFolders() {
+  return db
+    .prepare('SELECT * FROM folders ORDER BY sort_order ASC, created_at ASC')
+    .all()
+    .map(parseFolder);
+}
+
+export function nextFolderSortOrder() {
+  const row = db.prepare('SELECT MAX(sort_order) AS max FROM folders').get();
+  return (row?.max ?? 0) + 1;
 }
 
 export function getDatabase(pageId) {

@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import type { AIConfig, AISeed, Page, PageType, ThemePreference } from './types';
+import type { AIConfig, AISeed, Folder, Page, PageType, ThemePreference } from './types';
 
 export type Route = { view: 'page'; pageId: string } | { view: 'trash' } | { view: 'home' };
 
@@ -14,6 +14,7 @@ export interface ConfirmOptions {
 export interface AppContextValue {
   loading: boolean;
   pages: Page[];
+  folders: Folder[];
   workspaceName: string;
   trashCount: number;
   route: Route;
@@ -39,7 +40,16 @@ export interface AppContextValue {
   navigateTrash: () => void;
   navigateHome: () => void;
   refreshPages: () => Promise<void>;
-  createPage: (input?: { parentId?: string | null; type?: PageType; title?: string; icon?: string }) => Promise<Page | null>;
+  createPage: (input?: {
+    parentId?: string | null;
+    folderId?: string | null;
+    type?: PageType;
+    title?: string;
+    icon?: string;
+  }) => Promise<Page | null>;
+  createFolder: (name: string) => Promise<Folder | null>;
+  renameFolder: (id: string, name: string) => Promise<void>;
+  deleteFolder: (id: string) => Promise<void>;
   patchPage: (id: string, patch: Partial<Page>) => Promise<Page | undefined>;
   updatePageLocal: (id: string, patch: Partial<Page>) => void;
   toggleFavorite: (page: Page) => Promise<void>;

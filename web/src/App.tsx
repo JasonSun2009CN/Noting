@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppContext, type ConfirmOptions, type Route } from './context';
-import type { AIConfig, AISeed, Page, PageType, ThemePreference } from './types';
+import type { AIConfig, AISeed, Folder, Page, PageType, ThemePreference } from './types';
 import { api } from './api';
 import { descendantPageIds, isMac } from './lib/utils';
 import Sidebar from './components/Sidebar';
@@ -34,6 +34,7 @@ type ToastItem = { id: string; message: string; kind: 'default' | 'error' | 'suc
 export default function App() {
   const [loading, setLoading] = useState(true);
   const [pages, setPages] = useState<Page[]>([]);
+  const [folders, setFolders] = useState<Folder[]>([]);
   const [workspaceName, setWorkspaceName] = useState('My Workspace');
   const [trashCount, setTrashCount] = useState(0);
   const [route, setRoute] = useState<Route>(parseHash);
@@ -105,6 +106,7 @@ export default function App() {
   const refreshPages = useCallback(async () => {
     const data = await api.bootstrap();
     setPages(data.pages);
+    setFolders(data.folders || []);
     setWorkspaceName(data.workspace.name);
     setTrashCount(data.trashCount);
   }, []);
@@ -222,10 +224,17 @@ export default function App() {
   );
 
   const createPage = useCallback(
-    async (input?: { parentId?: string | null; type?: PageType; title?: string; icon?: string }) => {
+    async (input?: {
+      parentId?: string | null;
+      folderId?: string | null;
+      type?: PageType;
+      title?: string;
+      icon?: string;
+    }) => {
       try {
         const payload = await api.createPage({
           parentId: input?.parentId ?? null,
+          folderId: input?.folderId ?? null,
           type: input?.type ?? 'page',
           title: input?.title ?? '',
           icon: input?.icon,
@@ -239,6 +248,46 @@ export default function App() {
       }
     },
     [navigatePage, refreshPages, toast]
+  );
+
+  const createFolder = useCallback(
+    async (name: string) => {
+      try {
+        const { folder } = await api.createFolder(name);
+        await refreshPages();
+        toast('Folder created');
+        return folder;
+      } catch (error) {
+        toast(error instanceof Error ? error.message : 'Could not create the folder.', 'error');
+        return null;
+      }
+    },
+    [refreshPages, toast]
+  );
+
+  const renameFolder = useCallback(
+    async (id: string, name: string) => {
+      try {
+        await api.renameFolder(id, name);
+        await refreshPages();
+      } catch (error) {
+        toast(error instanceof Error ? error.message : 'Could not rename the folder.', 'error');
+      }
+    },
+    [refreshPages, toast]
+  );
+
+  const deleteFolder = useCallback(
+    async (id: string) => {
+      try {
+        await api.deleteFolder(id);
+        await refreshPages();
+        toast('Folder deleted · pages moved to Private');
+      } catch (error) {
+        toast(error instanceof Error ? error.message : 'Could not delete the folder.', 'error');
+      }
+    },
+    [refreshPages, toast]
   );
 
   const toggleFavorite = useCallback(
@@ -438,6 +487,7 @@ export default function App() {
     () => ({
       loading,
       pages,
+      folders,
       workspaceName,
       trashCount,
       route,
@@ -464,6 +514,9 @@ export default function App() {
       navigateHome,
       refreshPages,
       createPage,
+      createFolder,
+      renameFolder,
+      deleteFolder,
       patchPage,
       updatePageLocal,
       toggleFavorite,
@@ -477,6 +530,7 @@ export default function App() {
     [
       loading,
       pages,
+      folders,
       workspaceName,
       trashCount,
       route,
@@ -500,6 +554,9 @@ export default function App() {
       navigateHome,
       refreshPages,
       createPage,
+      createFolder,
+      renameFolder,
+      deleteFolder,
       patchPage,
       updatePageLocal,
       toggleFavorite,

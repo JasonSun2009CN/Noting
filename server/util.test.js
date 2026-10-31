@@ -81,6 +81,49 @@ test('htmlToMarkdown converts inline formatting', () => {
   assert.equal(htmlToMarkdown('<a href="https://a.test">link</a>'), '[link](https://a.test)');
 });
 
+test('sanitizeBlocks supports headings, toggles, equations, synced blocks, and columns', () => {
+  const blocks = sanitizeBlocks([
+    { id: 'h4', type: 'h4', html: 'Small' },
+    { id: 'th1', type: 'toggle_h1', html: 'Toggle', props: { collapsed: 1 } },
+    { id: 'eq', type: 'equation', html: '<b>x</b>', props: { tex: 'E = mc^2' } },
+    { id: 'sync', type: 'synced', html: '<b>Shared</b>', props: { syncId: 'sync-1' } },
+    {
+      id: 'cols',
+      type: 'columns',
+      html: '<b>ignored</b>',
+      props: { columns: 9, cells: ['<b>left</b>', 'right', '<script>x</script>'] },
+    },
+  ]);
+
+  assert.equal(blocks[0].type, 'h4');
+  assert.equal(blocks[1].props.collapsed, true);
+  assert.equal(blocks[2].html, '');
+  assert.equal(blocks[2].props.tex, 'E = mc^2');
+  assert.equal(blocks[3].html, '<b>Shared</b>');
+  assert.equal(blocks[3].props.syncId, 'sync-1');
+  assert.equal(blocks[4].html, '');
+  assert.equal(blocks[4].props.columns, 5);
+  assert.equal(blocks[4].props.cells.length, 5);
+  assert.equal(blocks[4].props.cells[0], '<b>left</b>');
+  assert.ok(!blocks[4].props.cells[2].includes('script'));
+});
+
+test('blocksToMarkdown renders heading 4, toggle headings, equations, and columns', () => {
+  const markdown = blocksToMarkdown(
+    { title: 'New blocks', type: 'page' },
+    [
+      { type: 'h4', html: 'Small heading' },
+      { type: 'toggle_h2', html: 'Toggle heading', props: { collapsed: false } },
+      { type: 'equation', props: { tex: 'a^2 + b^2 = c^2' } },
+      { type: 'columns', props: { columns: 2, cells: ['left', 'right'] } },
+    ]
+  );
+  assert.match(markdown, /^#### Small heading$/m);
+  assert.match(markdown, /^## Toggle heading$/m);
+  assert.match(markdown, /\$\$\na\^2 \+ b\^2 = c\^2\n\$\$/);
+  assert.match(markdown, /^left \| right$/m);
+});
+
 test('blocksToMarkdown renders pages, lists, code, and databases', () => {
   const markdown = blocksToMarkdown(
     { title: 'Doc', icon: '📄', type: 'page' },

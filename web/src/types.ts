@@ -3,19 +3,34 @@ export type BlockType =
   | 'h1'
   | 'h2'
   | 'h3'
+  | 'h4'
   | 'bulleted'
   | 'numbered'
   | 'todo'
   | 'toggle'
+  | 'toggle_h1'
+  | 'toggle_h2'
+  | 'toggle_h3'
+  | 'toggle_h4'
   | 'quote'
   | 'callout'
   | 'code'
+  | 'equation'
+  | 'synced'
+  | 'columns'
   | 'divider'
   | 'image'
   | 'page';
 
 export type PageType = 'page' | 'database';
 export type PropType = 'text' | 'number' | 'select' | 'multi_select' | 'checkbox' | 'date' | 'url';
+
+export interface Folder {
+  id: string;
+  name: string;
+  sortOrder: number;
+  createdAt: number;
+}
 
 export interface PageSettings {
   smallText?: boolean;
@@ -26,6 +41,7 @@ export interface PageSettings {
 export interface Page {
   id: string;
   parentId: string | null;
+  folderId: string | null;
   title: string;
   icon: string | null;
   cover: string | null;
@@ -47,6 +63,10 @@ export interface BlockProps {
   src?: string;
   caption?: string;
   pageId?: string;
+  tex?: string;
+  syncId?: string;
+  columns?: number;
+  cells?: string[];
 }
 
 export interface Block {
@@ -95,6 +115,7 @@ export interface PagePayload {
 
 export interface WorkspaceBootstrap {
   pages: Page[];
+  folders: Folder[];
   favorites: string[];
   workspace: { name: string };
   trashCount: number;
